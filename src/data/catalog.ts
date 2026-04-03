@@ -1552,28 +1552,28 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD2-AW-L-4ohm",
     "name": "6.5HD2-AW-L-4ohm",
-    "collection": "HD",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
     "modelId": "6.5HD2-AW-L-70V",
     "name": "6.5HD2-AW-L-70V",
-    "collection": "HD",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
   {
     "modelId": "6.5HD2-AW-S-4ohm",
     "name": "6.5HD2-AW-S-4ohm",
-    "collection": "HD",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
     "modelId": "6.5HD2-AW-S-70V",
     "name": "6.5HD2-AW-S-70V",
-    "collection": "HD",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 4,
     "tapOptions": [
@@ -1584,7 +1584,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD-AW-L-70V",
     "name": "6.5HD-AW-L-70V",
-    "collection": "HD",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1595,14 +1595,14 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD-AW-L-8ohm",
     "name": "6.5HD-AW-L-8ohm",
-    "collection": "HD",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 8
   },
   {
     "modelId": "6.5HD-AW-S-70V",
     "name": "6.5HD-AW-S-70V",
-    "collection": "HD",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1613,7 +1613,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD-AW-S-8ohm",
     "name": "6.5HD-AW-S-8ohm",
-    "collection": "HD",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 8
   },

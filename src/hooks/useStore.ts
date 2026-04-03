@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { applyNodeChanges, applyEdgeChanges } from '@xyflow/react'
 import type { Node, Edge, NodeChange, EdgeChange, Connection } from '@xyflow/react'
-import { AMPS, AMPS_SORTED, SPEAKERS, SUBS, MUSIC_SOURCE, type AmpModel, type SpeakerModel } from '../data/catalog'
+import { AMPS, SPEAKERS, SUBS, MUSIC_SOURCE, type AmpModel, type SpeakerModel } from '../data/catalog'
 import { validateLoZZone, validateHiZZone, type ZoneStatus } from '../utils/validation'
 
 // ── Node data types ──────────────────────────────────────────────────────────
@@ -574,7 +574,7 @@ export const useStore = create<StoreState>((set, get) => ({
 }))
 
 // Catalog exports for sidebar use
-export const CATALOG_AMPS = AMPS_SORTED
+export const CATALOG_AMPS = AMPS
 export const CATALOG_SPEAKERS = SPEAKERS
 export const CATALOG_SUBS = SUBS
 export const CATALOG_SOURCE = MUSIC_SOURCE
