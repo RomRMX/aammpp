@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { CATALOG_AMPS, CATALOG_SPEAKERS, CATALOG_SUBS, CATALOG_SOURCE } from '../hooks/useStore'
+import { CATALOG_AMPS, CATALOG_SUB_AMPS, CATALOG_SPEAKERS, CATALOG_SUBS, CATALOG_SOURCE } from '../hooks/useStore'
 import type { SpeakerModel } from '../data/catalog'
 import { cleanSpeakerName } from '../utils/display'
 
@@ -237,6 +237,11 @@ export function Sidebar({ onDragStart }: SidebarProps) {
     return q ? CATALOG_AMPS.filter(a => a.name.toLowerCase().includes(q) || a.modelId.toLowerCase().includes(q)) : CATALOG_AMPS
   }, [query])
 
+  const filteredSubAmps = useMemo(() => {
+    const q = query.toLowerCase()
+    return q ? CATALOG_SUB_AMPS.filter(a => a.name.toLowerCase().includes(q) || a.modelId.toLowerCase().includes(q)) : CATALOG_SUB_AMPS
+  }, [query])
+
   const [speakersOpen, setSpeakersOpen] = useState(true)
   const [subsOpen,     setSubsOpen]     = useState(true)
   const [sourceOpen,   setSourceOpen]   = useState(true)
@@ -293,15 +298,40 @@ export function Sidebar({ onDragStart }: SidebarProps) {
 
         {/* Subwoofers */}
         <SectionToggle label="Subwoofers" open={subsOpen} onToggle={() => setSubsOpen(o => !o)} sticky />
-        {subsOpen && BRAND_ORDER.filter(b => subBrands[b]).map(brand => (
-          <BrandGroup
-            key={brand}
-            brand={brand}
-            collections={subBrands[brand]}
-            kind="sub"
-            onDragStart={onDragStart}
-          />
-        ))}
+        {subsOpen && (
+          <>
+            {BRAND_ORDER.filter(b => subBrands[b]).map(brand => (
+              <BrandGroup
+                key={brand}
+                brand={brand}
+                collections={subBrands[brand]}
+                kind="sub"
+                onDragStart={onDragStart}
+              />
+            ))}
+            {filteredSubAmps.map((amp, i) => (
+              <div
+                key={amp.modelId}
+                draggable
+                onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '5px 8px',
+                  cursor: 'grab',
+                  borderTop: i === 0 ? 'none' : '1px solid var(--border)',
+                  borderBottom: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
+              >
+                <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{amp.name}</span>
+                <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 4 }}>Sub Amp</span>
+              </div>
+            ))}
+          </>
+        )}
 
         {/* Source */}
         <SectionToggle label="Source" open={sourceOpen} onToggle={() => setSourceOpen(o => !o)} sticky />

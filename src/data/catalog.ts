@@ -19,6 +19,8 @@ export interface AmpModel {
   dealer?: number
   msrp?: number
   channels: AmpChannel[]
+  /** True for sub-amplifiers — shown in the Subwoofers sidebar section, not Amplifiers */
+  subOnly?: boolean
 }
 
 export interface SpeakerModel {
@@ -202,6 +204,7 @@ export const AMPS: AmpModel[] = [
     "name": "SubA150",
     "series": "Foundation",
     "subtitle": "1× Lo-Z",
+    "subOnly": true,
     "dealer": 420,
     "msrp": 903,
     "channels": [
@@ -220,6 +223,7 @@ export const AMPS: AmpModel[] = [
     "name": "SubA500",
     "series": "Foundation",
     "subtitle": "1× Lo-Z",
+    "subOnly": true,
     "dealer": 807,
     "msrp": 1742,
     "channels": [

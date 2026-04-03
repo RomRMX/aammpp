@@ -546,7 +546,8 @@ export const useStore = create<StoreState>()(
 )
 
 // Catalog exports for sidebar use
-export const CATALOG_AMPS = AMPS_SORTED
+export const CATALOG_AMPS     = AMPS_SORTED.filter(a => !a.subOnly)
+export const CATALOG_SUB_AMPS = AMPS_SORTED.filter(a => a.subOnly)
 export const CATALOG_SPEAKERS = SPEAKERS
-export const CATALOG_SUBS = SUBS
-export const CATALOG_SOURCE = MUSIC_SOURCE
+export const CATALOG_SUBS     = SUBS
+export const CATALOG_SOURCE   = MUSIC_SOURCE
