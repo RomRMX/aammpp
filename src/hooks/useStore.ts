@@ -9,6 +9,8 @@ import { validateLoZZone, validateHiZZone, type ZoneStatus } from '../utils/vali
 export interface AmpNodeData {
   kind: 'amp'
   model: AmpModel
+  /** Per-channel lo-Z wiring mode (default: 'parallel') */
+  channelWiring?: Record<string, 'parallel' | 'series'>
   [key: string]: unknown
 }
 
@@ -53,12 +55,12 @@ function computeChannelStatus(
   channelOutputMode: 'lo-z' | 'hi-z',
   edges: AppEdge[],
   nodes: AppNode[]
-): { status: ZoneStatus; detail: string; loadPercent: number } {
+): { status: ZoneStatus; detail: string; loadPercent: number; speakerCount: number } {
   // Find all edges from this amp channel handle
   const handleId = `${channelId}-out`
   const outEdges = edges.filter(e => e.source === ampNodeId && e.sourceHandle === handleId)
 
-  if (outEdges.length === 0) return { status: 'green', detail: 'No load', loadPercent: 0 }
+  if (outEdges.length === 0) return { status: 'green', detail: 'No load', loadPercent: 0, speakerCount: 0 }
 
   // Get connected speaker nodes
   const connectedNodes = outEdges
@@ -77,13 +79,15 @@ function computeChannelStatus(
     const ampNode = nodes.find(n => n.id === ampNodeId)
     const ampData = ampNode?.data as AmpNodeData | undefined
     const channel = ampData?.model.channels.find(c => c.id === channelId)
-    if (!channel) return { status: 'green', detail: 'No channel', loadPercent: 0 }
+    if (!channel) return { status: 'green', detail: 'No channel', loadPercent: 0, speakerCount: 0 }
 
-    const result = validateLoZZone(channel, impedances)
+    const wiring = ampData?.channelWiring?.[channelId] ?? 'parallel'
+    const result = validateLoZZone(channel, impedances, wiring)
     const speakerCount = impedances.length
     const minImp = channel.minImpedance ?? 4
     const loadPercent = speakerCount === 0 ? 0 : Math.min((minImp / result.zLoad) * 100, 200)
-    return { status: result.status, detail: result.reason ?? `${impedances.length} speaker(s)`, loadPercent }
+    const wiringLabel = speakerCount >= 2 ? ` (${wiring})` : ''
+    return { status: result.status, detail: (result.reason ?? `${speakerCount} speaker(s)`) + wiringLabel, loadPercent, speakerCount }
   } else {
     // hi-z
     const tapWatts = connectedNodes.map(n => {
@@ -107,7 +111,7 @@ function computeChannelStatus(
 
     const result = validateHiZZone(channel, tapWatts)
     const loadPercent = result.capacity > 0 ? Math.min((result.wLoad / result.capacity) * 100, 200) : 0
-    return { status: result.status, detail: result.reason ?? `${tapWatts.length} speaker(s)`, loadPercent }
+    return { status: result.status, detail: result.reason ?? `${tapWatts.length} speaker(s)`, loadPercent, speakerCount: tapWatts.length }
   }
 }
 
@@ -180,10 +184,11 @@ interface StoreState {
   addSource: (pos: { x: number; y: number }) => void
 
   setTap: (nodeId: string, mode: 'lo-z' | '70v', watts?: number) => void
+  setChannelWiring: (ampNodeId: string, channelId: string, mode: 'parallel' | 'series') => void
 
   clearCanvas: () => void
 
-  getChannelZoneStatus: (ampNodeId: string, channelId: string, outputMode: 'lo-z' | 'hi-z') => { status: ZoneStatus; detail: string; loadPercent: number }
+  getChannelZoneStatus: (ampNodeId: string, channelId: string, outputMode: 'lo-z' | 'hi-z') => { status: ZoneStatus; detail: string; loadPercent: number; speakerCount: number }
   getOverallStatus: () => ZoneStatus
 
   // Derived catalog lookups
@@ -269,6 +274,22 @@ export const useStore = create<StoreState>((set, get) => ({
       nodes: state.nodes.map(n => {
         if (n.id !== nodeId) return n
         return { ...n, data: { ...n.data, selectedMode: mode, selectedTap: mode === 'lo-z' ? undefined : watts } }
+      }),
+    }))
+  },
+
+  setChannelWiring: (ampNodeId, channelId, mode) => {
+    set(state => ({
+      nodes: state.nodes.map(n => {
+        if (n.id !== ampNodeId) return n
+        const d = n.data as AmpNodeData
+        return {
+          ...n,
+          data: {
+            ...d,
+            channelWiring: { ...d.channelWiring, [channelId]: mode },
+          },
+        }
       }),
     }))
   },

@@ -53,19 +53,30 @@ export function parallelImpedance(impedances: number[]): number {
   return 1 / sum
 }
 
+/** Series impedance of N speakers daisy-chained on one lo-Z channel */
+export function seriesImpedance(impedances: number[]): number {
+  return impedances.reduce((acc, z) => acc + z, 0)
+}
+
 export interface LoZZoneResult {
   status: ZoneStatus
-  zLoad: number       // Ω (parallel)
+  zLoad: number       // Ω
   speakerCount: number
   reason?: string
 }
 
-export function validateLoZZone(channel: AmpChannel, speakerImpedances: number[]): LoZZoneResult {
+export function validateLoZZone(
+  channel: AmpChannel,
+  speakerImpedances: number[],
+  wiring: 'parallel' | 'series' = 'parallel',
+): LoZZoneResult {
   if (speakerImpedances.length === 0) {
     return { status: 'green', zLoad: Infinity, speakerCount: 0 }
   }
 
-  const zLoad = parallelImpedance(speakerImpedances)
+  const zLoad = wiring === 'series'
+    ? seriesImpedance(speakerImpedances)
+    : parallelImpedance(speakerImpedances)
   const minImp = channel.minImpedance ?? 4
 
   if (zLoad < minImp) {

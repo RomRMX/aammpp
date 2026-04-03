@@ -16,9 +16,10 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 function AmpNodeInner({ id, data }: NodeProps) {
-  const { model } = data as AmpNodeData
+  const { model, channelWiring } = data as AmpNodeData
   const { deleteElements } = useReactFlow()
   const getChannelZoneStatus = useStore(s => s.getChannelZoneStatus)
+  const setChannelWiring = useStore(s => s.setChannelWiring)
   const [showInfo, setShowInfo] = useState(false)
 
   const handleDelete = useCallback(() => {
@@ -173,12 +174,13 @@ function AmpNodeInner({ id, data }: NodeProps) {
 
         {/* Right column: output channels with load bars */}
         <div style={{ flex: 1 }}>
-          {channelStatuses.map(({ ch, status, detail, loadPercent }, idx) => {
+          {channelStatuses.map(({ ch, status, detail, loadPercent, speakerCount }, idx) => {
             const handleId = `${ch.id}-out`
             const watts    = ch.outputMode === 'hi-z' ? ch.hiZWatts : ch.maxWatts
             const barColor = loadPercent > 100 ? STATUS_COLOR.red
                            : loadPercent > 85  ? STATUS_COLOR.amber
                            : STATUS_COLOR.green
+            const wiring = channelWiring?.[ch.id] ?? 'parallel'
 
             return (
               <div key={ch.id}>
@@ -249,6 +251,34 @@ function AmpNodeInner({ id, data }: NodeProps) {
                     />
                   )}
                 </div>
+
+                {/* Series / Parallel toggle — lo-z only, when ≥2 speakers connected */}
+                {ch.outputMode === 'lo-z' && speakerCount >= 2 && (
+                  <div
+                    className="nodrag"
+                    style={{ display: 'flex', gap: 3, padding: '2px 22px 4px 8px', justifyContent: 'flex-end' }}
+                  >
+                    {(['parallel', 'series'] as const).map(m => (
+                      <button
+                        key={m}
+                        className="nodrag"
+                        onClick={() => setChannelWiring(id, ch.id, m)}
+                        style={{
+                          padding: '1px 6px',
+                          fontSize: 9,
+                          borderRadius: 2,
+                          border: `1px solid ${wiring === m ? 'var(--blue)' : 'var(--border)'}`,
+                          background: wiring === m ? 'rgba(74,143,212,0.15)' : 'var(--surface-2)',
+                          color: wiring === m ? 'var(--blue)' : 'var(--text-dim)',
+                          cursor: 'pointer',
+                          fontWeight: wiring === m ? 600 : 400,
+                        }}
+                      >
+                        {m === 'parallel' ? '∥ Parallel' : '— Series'}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           })}
