@@ -1,55 +1,24 @@
 import { useState, useMemo } from 'react'
 import { CATALOG_AMPS, CATALOG_SUB_AMPS, CATALOG_SPEAKERS, CATALOG_SUBS, CATALOG_SOURCE } from '../hooks/useStore'
-import type { SpeakerModel } from '../data/catalog'
+import type { SpeakerModel, AmpModel } from '../data/catalog'
 import { cleanSpeakerName } from '../utils/display'
 
 interface SidebarProps {
   onDragStart: (e: React.DragEvent, modelId: string, kind: 'amp' | 'speaker' | 'sub' | 'source') => void
 }
 
-const BRAND_ORDER = ['Origin Acoustics', 'Origin Pro', 'Ambisonic']
-
-const COLLECTION_TO_BRAND: Record<string, string> = {
-  Composer: 'Origin Acoustics',
-  Director: 'Origin Acoustics',
-  Marquee: 'Origin Acoustics',
-  Seasons: 'Origin Acoustics',
-  ThinFit: 'Origin Acoustics',
-  Theater: 'Origin Acoustics',
-  BLENDS: 'Origin Acoustics',
-  Producer: 'Origin Acoustics',
-  HD: 'Origin Acoustics',
-  Deep: 'Origin Acoustics',
-  Slim: 'Origin Acoustics',
-  Value: 'Origin Acoustics',
+// Amp brand lookup by series
+const AMP_SERIES_TO_BRAND: Record<string, string> = {
   Pro: 'Origin Pro',
-  AMBI: 'Ambisonic',
-  MOS: 'Ambisonic',
+  Foundation: 'Origin Acoustics',
 }
 
-function getBrand(item: SpeakerModel): string {
-  return COLLECTION_TO_BRAND[item.collection] ?? 'Origin Acoustics'
+function getAmpBrand(amp: AmpModel): string {
+  return AMP_SERIES_TO_BRAND[amp.series] ?? 'Origin Acoustics'
 }
 
-/** Group by brand → collection, filtering out specsUnavailable */
-function groupByBrandAndCollection(
-  items: SpeakerModel[],
-  query: string,
-): Record<string, Record<string, SpeakerModel[]>> {
-  const q = query.toLowerCase()
-  const result: Record<string, Record<string, SpeakerModel[]>> = {}
-  items
-    .filter(item => !item.specsUnavailable)
-    .filter(item => !q || item.modelId.toLowerCase().includes(q) || item.name.toLowerCase().includes(q))
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach(item => {
-      const brand = getBrand(item)
-      const col = item.collection || 'Other'
-      if (!result[brand]) result[brand] = {}
-      if (!result[brand][col]) result[brand][col] = []
-      result[brand][col].push(item)
-    })
-  return result
+function getSpeakerBrand(item: SpeakerModel): string {
+  return item.brand ?? 'Origin Acoustics'
 }
 
 function TypeBadge({ model }: { model: SpeakerModel }) {
@@ -168,14 +137,127 @@ function BrandGroup({
 
       {open && (
         <div>
-          {Object.entries(collections).map(([col, items]) => (
+          {Object.keys(collections).sort().map(col => (
             <CollectionGroup
               key={col}
               title={col}
-              items={items}
+              items={collections[col]}
               kind={kind}
               onDragStart={onDragStart}
             />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AmpBrandGroup({
+  brand,
+  collections,
+  onDragStart,
+}: {
+  brand: string
+  collections: Record<string, AmpModel[]>
+  onDragStart: SidebarProps['onDragStart']
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '5px 8px',
+          background: 'var(--surface-2)',
+          border: 'none',
+          color: 'var(--blue)',
+          cursor: 'pointer',
+          fontSize: 11,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}
+      >
+        <span>{brand}</span>
+        <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
+      </button>
+
+      {open && (
+        <div>
+          {Object.keys(collections).sort().map(col => (
+            <AmpCollectionGroup
+              key={col}
+              title={col}
+              items={collections[col]}
+              onDragStart={onDragStart}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AmpCollectionGroup({
+  title,
+  items,
+  onDragStart,
+}: {
+  title: string
+  items: AmpModel[]
+  onDragStart: SidebarProps['onDragStart']
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '4px 8px 4px 16px',
+          background: 'var(--surface-2)',
+          border: 'none',
+          color: 'var(--text-secondary)',
+          cursor: 'pointer',
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}
+      >
+        <span>{title}</span>
+        <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
+      </button>
+
+      {open && (
+        <div>
+          {items.map(amp => (
+            <div
+              key={amp.modelId}
+              draggable
+              onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '5px 8px 5px 24px',
+                cursor: 'grab',
+                borderTop: '1px solid var(--border)',
+                background: 'var(--surface)',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
+            >
+              <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{amp.name}</span>
+            </div>
           ))}
         </div>
       )}
@@ -221,6 +303,47 @@ function SectionToggle({
   )
 }
 
+/** Group speakers/subs by brand → collection, filtering out specsUnavailable */
+function groupByBrandAndCollection(
+  items: SpeakerModel[],
+  query: string,
+): Record<string, Record<string, SpeakerModel[]>> {
+  const q = query.toLowerCase()
+  const result: Record<string, Record<string, SpeakerModel[]>> = {}
+  items
+    .filter(item => !item.specsUnavailable)
+    .filter(item => !q || item.modelId.toLowerCase().includes(q) || item.name.toLowerCase().includes(q))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(item => {
+      const brand = getSpeakerBrand(item)
+      const col = item.collection || 'Other'
+      if (!result[brand]) result[brand] = {}
+      if (!result[brand][col]) result[brand][col] = []
+      result[brand][col].push(item)
+    })
+  return result
+}
+
+/** Group amps by brand → collection (series) */
+function groupAmpsByBrandAndCollection(
+  items: AmpModel[],
+  query: string,
+): Record<string, Record<string, AmpModel[]>> {
+  const q = query.toLowerCase()
+  const result: Record<string, Record<string, AmpModel[]>> = {}
+  items
+    .filter(amp => !q || amp.name.toLowerCase().includes(q) || amp.modelId.toLowerCase().includes(q))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(amp => {
+      const brand = getAmpBrand(amp)
+      const col = amp.series || 'Other'
+      if (!result[brand]) result[brand] = {}
+      if (!result[brand][col]) result[brand][col] = []
+      result[brand][col].push(amp)
+    })
+  return result
+}
+
 export function Sidebar({ onDragStart }: SidebarProps) {
   const [query, setQuery] = useState('')
 
@@ -232,15 +355,14 @@ export function Sidebar({ onDragStart }: SidebarProps) {
     () => groupByBrandAndCollection(CATALOG_SUBS, query),
     [query],
   )
-  const filteredAmps = useMemo(() => {
-    const q = query.toLowerCase()
-    return q ? CATALOG_AMPS.filter(a => a.name.toLowerCase().includes(q) || a.modelId.toLowerCase().includes(q)) : CATALOG_AMPS
-  }, [query])
-
-  const filteredSubAmps = useMemo(() => {
-    const q = query.toLowerCase()
-    return q ? CATALOG_SUB_AMPS.filter(a => a.name.toLowerCase().includes(q) || a.modelId.toLowerCase().includes(q)) : CATALOG_SUB_AMPS
-  }, [query])
+  const ampBrands = useMemo(
+    () => groupAmpsByBrandAndCollection(CATALOG_AMPS, query),
+    [query],
+  )
+  const subAmpBrands = useMemo(
+    () => groupAmpsByBrandAndCollection(CATALOG_SUB_AMPS, query),
+    [query],
+  )
 
   const [speakersOpen, setSpeakersOpen] = useState(true)
   const [subsOpen,     setSubsOpen]     = useState(true)
@@ -284,9 +406,20 @@ export function Sidebar({ onDragStart }: SidebarProps) {
       {/* Scrollable content */}
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
 
+        {/* Amplifiers */}
+        <SectionToggle label="Amplifiers" open={ampsOpen} onToggle={() => setAmpsOpen(o => !o)} sticky />
+        {ampsOpen && Object.keys(ampBrands).sort().map(brand => (
+          <AmpBrandGroup
+            key={brand}
+            brand={brand}
+            collections={ampBrands[brand]}
+            onDragStart={onDragStart}
+          />
+        ))}
+
         {/* Speakers */}
         <SectionToggle label="Speakers" open={speakersOpen} onToggle={() => setSpeakersOpen(o => !o)} sticky />
-        {speakersOpen && BRAND_ORDER.filter(b => speakerBrands[b]).map(brand => (
+        {speakersOpen && Object.keys(speakerBrands).sort().map(brand => (
           <BrandGroup
             key={brand}
             brand={brand}
@@ -300,7 +433,7 @@ export function Sidebar({ onDragStart }: SidebarProps) {
         <SectionToggle label="Subwoofers" open={subsOpen} onToggle={() => setSubsOpen(o => !o)} sticky />
         {subsOpen && (
           <>
-            {BRAND_ORDER.filter(b => subBrands[b]).map(brand => (
+            {Object.keys(subBrands).sort().map(brand => (
               <BrandGroup
                 key={brand}
                 brand={brand}
@@ -309,26 +442,13 @@ export function Sidebar({ onDragStart }: SidebarProps) {
                 onDragStart={onDragStart}
               />
             ))}
-            {filteredSubAmps.map((amp, i) => (
-              <div
-                key={amp.modelId}
-                draggable
-                onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '5px 8px',
-                  cursor: 'grab',
-                  borderTop: i === 0 ? 'none' : '1px solid var(--border)',
-                  borderBottom: '1px solid var(--border)',
-                  background: 'var(--surface)',
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
-              >
-                <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{amp.name}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 4 }}>Sub Amp</span>
-              </div>
+            {Object.keys(subAmpBrands).sort().map(brand => (
+              <AmpBrandGroup
+                key={`subamp-${brand}`}
+                brand={brand}
+                collections={subAmpBrands[brand]}
+                onDragStart={onDragStart}
+              />
             ))}
           </>
         )}
@@ -353,33 +473,6 @@ export function Sidebar({ onDragStart }: SidebarProps) {
             <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>
               {CATALOG_SOURCE.name}
             </span>
-          </div>
-        )}
-
-        {/* Amplifiers */}
-        <SectionToggle label="Amplifiers" open={ampsOpen} onToggle={() => setAmpsOpen(o => !o)} sticky />
-        {ampsOpen && (
-          <div>
-            {filteredAmps.map((amp, i) => (
-              <div
-                key={amp.modelId}
-                draggable
-                onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '5px 8px',
-                  cursor: 'grab',
-                  borderTop: i === 0 ? 'none' : '1px solid var(--border)',
-                  borderBottom: '1px solid var(--border)',
-                  background: 'var(--surface)',
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
-              >
-                <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{amp.name}</span>
-              </div>
-            ))}
           </div>
         )}
 
