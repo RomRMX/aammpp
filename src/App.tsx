@@ -321,12 +321,17 @@ function AppInner() {
           flexShrink: 0,
         }}
       >
-        {/* Logo */}
-        <img
-          src="/aammpp_logo.png"
-          alt="AAMMPP"
-          style={{ height: 36, width: 'auto', display: 'block' }}
-        />
+        {/* Logo + version */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <img
+            src="/aammpp_logo.png"
+            alt="AAMMPP"
+            style={{ height: 36, width: 'auto', display: 'block' }}
+          />
+          <span style={{ fontSize: 10, color: 'var(--text-dim)', fontWeight: 500, letterSpacing: '0.04em' }}>
+            v{__APP_VERSION__}
+          </span>
+        </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Global status badge */}
