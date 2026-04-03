@@ -971,6 +971,20 @@ export const AMPS: AmpModel[] = [
   }
 ];
 
+const AMP_ORDER = [
+  'ProA125.1','ProA125.2','ProA125.4',
+  'ProA250.1','ProA250.2','ProA250.4',
+  'ProA1000.1','ProA1000.2','ProA1000.4',
+  'ProA1200.1','ProA1200.2','ProA1200.4',
+  'DSP2-200','DSP3-150','DSP60.8',
+  'SubA150','SubA500',
+]
+export const AMPS_SORTED = [...AMPS].sort((a, b) => {
+  const ai = AMP_ORDER.indexOf(a.modelId)
+  const bi = AMP_ORDER.indexOf(b.modelId)
+  return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi)
+})
+
 export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "C63",
@@ -1302,15 +1316,15 @@ export const SPEAKERS: SpeakerModel[] = [
     "specsUnavailable": true
   },
   {
-    "modelId": "M3500OW",
-    "name": "M3500OW",
+    "modelId": "M3500",
+    "name": "M3500",
     "collection": "Marquee",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
   {
-    "modelId": "M5500OW",
-    "name": "M5500OW",
+    "modelId": "M5500",
+    "name": "M5500",
     "collection": "Marquee",
     "speakerType": "lo-z",
     "specsUnavailable": true
@@ -1356,45 +1370,6 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Seasons",
     "speakerType": "lo-z",
     "impedance": 8
-  },
-  {
-    "modelId": "PP50",
-    "name": "PP50",
-    "collection": "Professional",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      30,
-      15,
-      7.5,
-      3.75
-    ]
-  },
-  {
-    "modelId": "PP60",
-    "name": "PP60",
-    "collection": "Professional",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      60,
-      30,
-      15,
-      7.5
-    ]
-  },
-  {
-    "modelId": "PP80",
-    "name": "PP80",
-    "collection": "Professional",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      60,
-      30,
-      15,
-      7.5
-    ]
   },
   {
     "modelId": "TF37DTEX",
@@ -1512,38 +1487,28 @@ export const SPEAKERS: SpeakerModel[] = [
     ]
   },
   {
-    "modelId": "PCSUB8",
-    "name": "PCSUB8",
-    "collection": "Pro",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      120,
-      60,
-      30,
-      15
-    ]
-  },
-  {
     "modelId": "PP50",
     "name": "PP50",
     "collection": "Pro",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [30, 15, 7.5, 3.75]
   },
   {
     "modelId": "PP60",
     "name": "PP60",
     "collection": "Pro",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [60, 30, 15, 7.5]
   },
   {
     "modelId": "PP80",
     "name": "PP80",
     "collection": "Pro",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [60, 30, 15, 7.5]
   },
   {
     "modelId": "PS50",
@@ -1585,29 +1550,29 @@ export const SPEAKERS: SpeakerModel[] = [
     ]
   },
   {
-    "modelId": "6.5HD2-AW-L-4ohm-BK",
-    "name": "6.5HD2-AW-L-4ohm-BK",
+    "modelId": "6.5HD2-AW-L-4ohm",
+    "name": "6.5HD2-AW-L-4ohm",
     "collection": "HD",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
-    "modelId": "6.5HD2-AW-L-70V-BK",
-    "name": "6.5HD2-AW-L-70V-BK",
+    "modelId": "6.5HD2-AW-L-70V",
+    "name": "6.5HD2-AW-L-70V",
     "collection": "HD",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
   {
-    "modelId": "6.5HD2-AW-S-4ohm-BK",
-    "name": "6.5HD2-AW-S-4ohm-BK",
+    "modelId": "6.5HD2-AW-S-4ohm",
+    "name": "6.5HD2-AW-S-4ohm",
     "collection": "HD",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
-    "modelId": "6.5HD2-AW-S-70V-BK",
-    "name": "6.5HD2-AW-S-70V-BK",
+    "modelId": "6.5HD2-AW-S-70V",
+    "name": "6.5HD2-AW-S-70V",
     "collection": "HD",
     "speakerType": "tappable",
     "impedance": 4,
@@ -1617,8 +1582,8 @@ export const SPEAKERS: SpeakerModel[] = [
     ]
   },
   {
-    "modelId": "6.5HD-AW-L-70V-BK",
-    "name": "6.5HD-AW-L-70V-BK",
+    "modelId": "6.5HD-AW-L-70V",
+    "name": "6.5HD-AW-L-70V",
     "collection": "HD",
     "speakerType": "tappable",
     "impedance": 8,
@@ -1628,15 +1593,15 @@ export const SPEAKERS: SpeakerModel[] = [
     ]
   },
   {
-    "modelId": "6.5HD-AW-L-8ohm-BK",
-    "name": "6.5HD-AW-L-8ohm-BK",
+    "modelId": "6.5HD-AW-L-8ohm",
+    "name": "6.5HD-AW-L-8ohm",
     "collection": "HD",
     "speakerType": "lo-z",
     "impedance": 8
   },
   {
-    "modelId": "6.5HD-AW-S-70V-BK",
-    "name": "6.5HD-AW-S-70V-BK",
+    "modelId": "6.5HD-AW-S-70V",
+    "name": "6.5HD-AW-S-70V",
     "collection": "HD",
     "speakerType": "tappable",
     "impedance": 8,
@@ -1646,16 +1611,16 @@ export const SPEAKERS: SpeakerModel[] = [
     ]
   },
   {
-    "modelId": "6.5HD-AW-S-8ohm-BK",
-    "name": "6.5HD-AW-S-8ohm-BK",
+    "modelId": "6.5HD-AW-S-8ohm",
+    "name": "6.5HD-AW-S-8ohm",
     "collection": "HD",
     "speakerType": "lo-z",
     "impedance": 8
   },
   {
-    "modelId": "ALSB106BLK",
-    "name": "ALSB106BLK",
-    "collection": "Seasons",
+    "modelId": "ALSB106",
+    "name": "ALSB106",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [
@@ -1670,7 +1635,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ALSB64",
     "name": "ALSB64",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [
@@ -1685,7 +1650,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ALSB85",
     "name": "ALSB85",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [
@@ -1700,7 +1665,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "LSR40",
     "name": "LSR40",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1711,7 +1676,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "LSR60",
     "name": "LSR60",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1722,7 +1687,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "LSR80",
     "name": "LSR80",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1731,58 +1696,37 @@ export const SPEAKERS: SpeakerModel[] = [
     ]
   },
   {
-    "modelId": "AM5600IW",
-    "name": "AM5600IW",
-    "collection": "Marquee",
+    "modelId": "AM5600",
+    "name": "AM5600",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
-    "modelId": "AM3600IW",
-    "name": "AM3600IW",
-    "collection": "Marquee",
+    "modelId": "AM3600",
+    "name": "AM3600",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
-    "modelId": "AM650OWA",
-    "name": "AM650OWA",
-    "collection": "Marquee",
+    "modelId": "AM6500A",
+    "name": "AM6500A",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
-    "modelId": "LSH40BL",
-    "name": "LSH40BL",
+    "modelId": "ASM63",
+    "name": "ASM63",
     "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 8
   },
   {
-    "modelId": "LSH60BL",
-    "name": "LSH60BL",
+    "modelId": "ASM63SUB",
+    "name": "ASM63SUB",
     "collection": "AMBI",
-    "speakerType": "lo-z",
-    "impedance": 8
-  },
-  {
-    "modelId": "LSH80BL",
-    "name": "LSH80BL",
-    "collection": "AMBI",
-    "speakerType": "lo-z",
-    "impedance": 8
-  },
-  {
-    "modelId": "ASM63BL",
-    "name": "ASM63BL",
-    "collection": "Seasons",
-    "speakerType": "lo-z",
-    "impedance": 8
-  },
-  {
-    "modelId": "ASM63SUB-BL",
-    "name": "ASM63SUB-BL",
-    "collection": "Seasons",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1872,8 +1816,8 @@ export const SUBS: SpeakerModel[] = [
     "specsUnavailable": true
   },
   {
-    "modelId": "12BP-IG : 12BP-IG-8ohm",
-    "name": "12BP-IG : 12BP-IG-8ohm",
+    "modelId": "12BP-IG-8ohm",
+    "name": "12BP-IG-8ohm",
     "collection": "Seasons",
     "speakerType": "lo-z",
     "impedance": 8
@@ -1929,19 +1873,6 @@ export const SUBS: SpeakerModel[] = [
     "speakerType": "hi-z",
     "tapOptions": [
       300
-    ]
-  },
-  {
-    "modelId": "PPSUB8",
-    "name": "PPSUB8",
-    "collection": "Professional",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      120,
-      60,
-      30,
-      15
     ]
   },
   {
@@ -2009,8 +1940,17 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "PPSUB8",
     "name": "PPSUB8",
     "collection": "Pro",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [120, 60, 30, 15]
+  },
+  {
+    "modelId": "PCSUB8",
+    "name": "PCSUB8",
+    "collection": "Pro",
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [120, 60, 30, 15]
   }
 ];
 
