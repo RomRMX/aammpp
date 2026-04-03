@@ -107,7 +107,7 @@ function computeChannelStatus(
     const ampNode = nodes.find(n => n.id === ampNodeId)
     const ampData = ampNode?.data as AmpNodeData | undefined
     const channel = ampData?.model.channels.find(c => c.id === channelId)
-    if (!channel) return { status: 'green', detail: 'No channel', loadPercent: 0 }
+    if (!channel) return { status: 'green', detail: 'No channel', loadPercent: 0, speakerCount: 0 }
 
     const result = validateHiZZone(channel, tapWatts)
     const loadPercent = result.capacity > 0 ? Math.min((result.wLoad / result.capacity) * 100, 200) : 0
