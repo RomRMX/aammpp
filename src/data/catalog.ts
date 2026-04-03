@@ -1983,6 +1983,34 @@ export const SUBS: SpeakerModel[] = [
     "tapOptions": [120, 60, 30, 15],
     "sensitivity": 90,
     "maxWatts": 125
+  },
+  {
+    "modelId": "DSUB6X2",
+    "name": "DSUB6X2",
+    "collection": "Deep",
+    "speakerType": "lo-z",
+    "impedance": 6,
+    "sensitivity": 90,
+    "maxWatts": 120
+  },
+  {
+    "modelId": "PSUB10X2",
+    "name": "PSUB10X2",
+    "collection": "Pro",
+    "speakerType": "tappable",
+    "impedance": 4,
+    "tapOptions": [300, 150, 75],
+    "sensitivity": 94,
+    "maxWatts": 600
+  },
+  {
+    "modelId": "BLENDSCSUB10",
+    "name": "BLENDSCSUB10",
+    "collection": "BLENDS",
+    "speakerType": "lo-z",
+    "impedance": 4,
+    "sensitivity": 90,
+    "maxWatts": 200
   }
 ];
 
