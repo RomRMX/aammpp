@@ -26,7 +26,6 @@ const NODE_TYPES = {
   sourceNode: SourceNode,
 }
 
-// Build PortMeta from a node and handle ID
 function buildPortMetaResolver(nodes: AppNode[]) {
   return (nodeId: string, handleId: string): PortMeta | undefined => {
     const node = nodes.find((n: AppNode) => n.id === nodeId)
@@ -38,7 +37,6 @@ function buildPortMetaResolver(nodes: AppNode[]) {
       if (handleId === 'analog-in') {
         return { deviceId: nodeId, portId: handleId, signalType: 'analog', direction: 'input' }
       }
-      // Channel output handle: "{chId}-out"
       const ch = model.channels.find(c => `${c.id}-out` === handleId)
       if (ch) {
         return {
@@ -56,7 +54,6 @@ function buildPortMetaResolver(nodes: AppNode[]) {
       if (handleId === 'spk-in-hiz') {
         return { deviceId: nodeId, portId: handleId, signalType: 'speaker-hiz', direction: 'input' }
       }
-      // Default based on speaker type
       const sigType = spkData.model.speakerType === 'hi-z' ? 'speaker-hiz' : 'speaker-loz'
       return { deviceId: nodeId, portId: handleId, signalType: sigType, direction: 'input' }
     } else if (d.kind === 'source') {
@@ -71,6 +68,13 @@ function buildPortMetaResolver(nodes: AppNode[]) {
 
 const STATUS_LABEL: Record<string, string> = { green: 'OK', amber: 'MARGINAL', red: 'FAULT' }
 const STATUS_COLOR: Record<string, string> = { green: '#4caf50', amber: '#f59e0b', red: '#ef4444' }
+
+const HINT_STEPS = [
+  { icon: '⬡', text: 'Drag a device from the sidebar onto the canvas' },
+  { icon: '◎', text: 'Click a port handle to start a wire' },
+  { icon: '✕', text: 'Click a wire to delete it' },
+  { icon: '⌦', text: 'Select a node and press Delete to remove it' },
+]
 
 function AppInner() {
   const { screenToFlowPosition } = useReactFlow()
@@ -152,7 +156,6 @@ function AppInner() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Overall status badge */}
           <div
             style={{
               display: 'flex',
@@ -215,58 +218,108 @@ function AppInner() {
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar onDragStart={onDragStart} />
 
-        {/* Canvas */}
-        <div style={{ flex: 1, position: 'relative' }}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            nodeTypes={NODE_TYPES}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            isValidConnection={isValidConn}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            fitView
-            deleteKeyCode="Delete"
-            style={{ background: 'var(--bg)' }}
-            defaultEdgeOptions={{ style: { stroke: 'var(--blue)', strokeWidth: 2 } }}
-          >
-            <Background
-              variant={BackgroundVariant.Dots}
-              gap={24}
-              size={1}
-              color="var(--border)"
-            />
-            <Controls
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-            />
-            <MiniMap
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-              nodeColor="var(--surface-2)"
-            />
-          </ReactFlow>
-
-          {/* Empty canvas hint */}
-          {nodes.length === 0 && (
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                pointerEvents: 'none',
-                gap: 8,
-              }}
+        {/* Canvas column */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* Canvas */}
+          <div style={{ flex: 1, position: 'relative' }}>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              nodeTypes={NODE_TYPES}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              isValidConnection={isValidConn}
+              onDrop={onDrop}
+              onDragOver={onDragOver}
+              fitView
+              deleteKeyCode="Delete"
+              style={{ background: 'var(--bg)' }}
+              defaultEdgeOptions={{ style: { stroke: 'var(--blue)', strokeWidth: 2 } }}
             >
-              <span style={{ fontSize: 32, opacity: 0.2 }}>⬡</span>
-              <span style={{ color: 'var(--text-dim)', fontSize: 13 }}>
-                Drag devices from the sidebar onto the canvas
-              </span>
-            </div>
-          )}
+              <Background
+                variant={BackgroundVariant.Dots}
+                gap={24}
+                size={1}
+                color="var(--border)"
+              />
+
+              {/* Styled Controls */}
+              <Controls
+                showInteractive={false}
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              />
+
+              <MiniMap
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                nodeColor="var(--surface-2)"
+              />
+            </ReactFlow>
+
+            {/* Empty canvas hint */}
+            {nodes.length === 0 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  pointerEvents: 'none',
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 32, opacity: 0.15 }}>⬡</span>
+                <span style={{ color: 'var(--text-dim)', fontSize: 13 }}>
+                  Drag devices from the sidebar onto the canvas
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Instruction bar */}
+          <div
+            style={{
+              height: 34,
+              background: 'var(--surface)',
+              borderTop: '1px solid var(--border)',
+              display: 'flex',
+              alignItems: 'center',
+              paddingLeft: 16,
+              gap: 0,
+              flexShrink: 0,
+              overflowX: 'auto',
+            }}
+          >
+            {HINT_STEPS.map((step, i) => (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  paddingRight: 20,
+                  borderRight: i < HINT_STEPS.length - 1 ? '1px solid var(--border)' : 'none',
+                  marginRight: i < HINT_STEPS.length - 1 ? 20 : 0,
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: 13, color: 'var(--blue)', opacity: 0.7 }}>{step.icon}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
+                  {step.text}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

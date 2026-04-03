@@ -6,26 +6,47 @@ interface SidebarProps {
   onDragStart: (e: React.DragEvent, modelId: string, kind: 'amp' | 'speaker' | 'sub' | 'source') => void
 }
 
-// Group speakers/subs by collection
+// Collection color palette
+const COLLECTION_COLORS: Record<string, string> = {
+  'Composer':     '#7ca5d4',
+  'Director':     '#74b87a',
+  'ThinFit':      '#6ec4c4',
+  'BLENDS':       '#a87ee0',
+  'Seasons':      '#c4a55a',
+  'Pro':          '#d47878',
+  'AMBI':         '#7ec49e',
+  'HD':           '#6ab8d8',
+  'Marquee':      '#c47ca8',
+  'Foundation':   '#8898b8',
+  'Theater':      '#b4a468',
+  'Professional': '#c4a870',
+  'Slim':         '#94b8a8',
+  'Other':        '#888888',
+}
+
+function collectionColor(name: string): string {
+  return COLLECTION_COLORS[name] ?? '#888888'
+}
+
+// Group by collection, filtering out specsUnavailable items
 function groupByCollection(items: SpeakerModel[]): Record<string, SpeakerModel[]> {
   const groups: Record<string, SpeakerModel[]> = {}
-  items.forEach(item => {
-    const col = item.collection || 'Other'
-    if (!groups[col]) groups[col] = []
-    groups[col].push(item)
-  })
+  items
+    .filter(item => !item.specsUnavailable)
+    .forEach(item => {
+      const col = item.collection || 'Other'
+      if (!groups[col]) groups[col] = []
+      groups[col].push(item)
+    })
   return groups
 }
 
 function TypeBadge({ model }: { model: SpeakerModel }) {
-  if (model.specsUnavailable) {
-    return <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 4 }}>N/A</span>
-  }
   if (model.speakerType === 'tappable') {
-    return <span style={{ fontSize: 10, color: 'var(--amber)', marginLeft: 4 }}>8Ω/70V</span>
+    return <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>8Ω/70V</span>
   }
   if (model.speakerType === 'hi-z') {
-    return <span style={{ fontSize: 10, color: '#f59e0b', marginLeft: 4 }}>70V</span>
+    return <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>70V</span>
   }
   if (model.impedance !== undefined) {
     return <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 4 }}>{model.impedance}Ω</span>
@@ -44,7 +65,9 @@ function CollectionGroup({
   kind: 'speaker' | 'sub'
   onDragStart: SidebarProps['onDragStart']
 }) {
-  const [open, setOpen] = useState(true)
+  // Start collapsed
+  const [open, setOpen] = useState(false)
+  const color = collectionColor(title)
 
   return (
     <div style={{ borderBottom: '1px solid var(--border)' }}>
@@ -58,7 +81,7 @@ function CollectionGroup({
           padding: '5px 8px',
           background: 'none',
           border: 'none',
-          color: 'var(--text-secondary)',
+          color,
           cursor: 'pointer',
           fontSize: 11,
           fontWeight: 600,
@@ -67,7 +90,7 @@ function CollectionGroup({
         }}
       >
         <span>{title}</span>
-        <span style={{ fontSize: 9 }}>{open ? '▲' : '▼'}</span>
+        <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
       </button>
 
       {open && (
@@ -83,7 +106,6 @@ function CollectionGroup({
                 padding: '4px 8px 4px 16px',
                 cursor: 'grab',
                 borderTop: '1px solid var(--border)',
-                opacity: item.specsUnavailable ? 0.5 : 1,
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
@@ -150,10 +172,7 @@ export function Sidebar({ onDragStart }: SidebarProps) {
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
       >
         <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginRight: 6 }}>▶</span>
-        <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{CATALOG_SOURCE.name}</span>
-        <span style={{ fontSize: 10, color: 'var(--text-secondary)', background: 'var(--surface-2)', padding: '1px 4px', borderRadius: 2, border: '1px solid var(--border)' }}>
-          STREAM
-        </span>
+        <span style={{ fontSize: 12, color: 'var(--text-primary)' }}>{CATALOG_SOURCE.name}</span>
       </div>
 
       {/* Scrollable speakers + subs */}
@@ -169,15 +188,10 @@ export function Sidebar({ onDragStart }: SidebarProps) {
         ))}
       </div>
 
-      {/* Amps — fixed bottom */}
-      <div
-        style={{
-          borderTop: '2px solid var(--border)',
-          background: 'var(--surface)',
-        }}
-      >
+      {/* Amps — fixed bottom, no scroll */}
+      <div style={{ borderTop: '2px solid var(--border)', background: 'var(--surface)' }}>
         <SectionHeader label="Amplifiers" />
-        <div style={{ maxHeight: 220, overflowY: 'auto' }}>
+        <div>
           {CATALOG_AMPS.map(amp => (
             <div
               key={amp.modelId}
