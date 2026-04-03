@@ -1,7 +1,7 @@
 import { memo, useState, useCallback } from 'react'
 import { NodeResizer, useReactFlow } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
-import type { ZoneNodeData } from '../hooks/useStore'
+import { useStore, type ZoneNodeData } from '../hooks/useStore'
 
 // Pre-computed bg for each zone border color
 const ZONE_BG: Record<string, string> = {
@@ -14,18 +14,15 @@ const ZONE_BG: Record<string, string> = {
 
 function ZoneNodeInner({ id, data, selected }: NodeProps) {
   const { label, color } = data as ZoneNodeData
-  const { deleteElements, setNodes } = useReactFlow()
+  const { deleteElements } = useReactFlow()
+  const setZoneLabel = useStore(s => s.setZoneLabel)
   const [editing, setEditing]     = useState(false)
   const [editValue, setEditValue] = useState(label)
 
   const commitLabel = useCallback(() => {
-    setNodes(nodes =>
-      nodes.map(n =>
-        n.id === id ? { ...n, data: { ...n.data, label: editValue } } : n
-      )
-    )
+    setZoneLabel(id, editValue)
     setEditing(false)
-  }, [id, editValue, setNodes])
+  }, [id, editValue, setZoneLabel])
 
   const bg = ZONE_BG[color] ?? 'rgba(74,143,212,0.07)'
 

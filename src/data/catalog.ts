@@ -19,6 +19,8 @@ export interface AmpModel {
   dealer?: number
   msrp?: number
   channels: AmpChannel[]
+  /** True for sub-amplifiers — shown in the Subwoofers sidebar section, not Amplifiers */
+  subOnly?: boolean
 }
 
 export interface SpeakerModel {
@@ -26,9 +28,12 @@ export interface SpeakerModel {
   name: string
   collection: string
   speakerType: 'lo-z' | 'hi-z' | 'tappable'
-  impedance?: number      // Ω nominal
-  tapOptions?: number[]   // 70V watt taps (descending)
+  impedance?: number        // Ω nominal
+  tapOptions?: number[]     // 70V watt taps (descending)
   specsUnavailable?: boolean
+  sensitivity?: number      // dB SPL @ 1W/1m (for SPL estimation)
+  maxWatts?: number         // Continuous power handling (W)
+  coverageAngle?: number    // Nominal dispersion angle (degrees, for future coverage calc)
 }
 
 export interface SourceModel {
@@ -202,6 +207,7 @@ export const AMPS: AmpModel[] = [
     "name": "SubA150",
     "series": "Foundation",
     "subtitle": "1× Lo-Z",
+    "subOnly": true,
     "dealer": 420,
     "msrp": 903,
     "channels": [
@@ -220,6 +226,7 @@ export const AMPS: AmpModel[] = [
     "name": "SubA500",
     "series": "Foundation",
     "subtitle": "1× Lo-Z",
+    "subOnly": true,
     "dealer": 807,
     "msrp": 1742,
     "channels": [
@@ -971,6 +978,20 @@ export const AMPS: AmpModel[] = [
   }
 ];
 
+const AMP_ORDER = [
+  'ProA125.1','ProA125.2','ProA125.4',
+  'ProA250.1','ProA250.2','ProA250.4',
+  'ProA1000.1','ProA1000.2','ProA1000.4',
+  'ProA1200.1','ProA1200.2','ProA1200.4',
+  'DSP2-200','DSP3-150','DSP60.8',
+  'SubA150','SubA500',
+]
+export const AMPS_SORTED = [...AMPS].sort((a, b) => {
+  const ai = AMP_ORDER.indexOf(a.modelId)
+  const bi = AMP_ORDER.indexOf(b.modelId)
+  return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi)
+})
+
 export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "C63",
@@ -1302,15 +1323,15 @@ export const SPEAKERS: SpeakerModel[] = [
     "specsUnavailable": true
   },
   {
-    "modelId": "M3500OW",
-    "name": "M3500OW",
+    "modelId": "M3500",
+    "name": "M3500",
     "collection": "Marquee",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
   {
-    "modelId": "M5500OW",
-    "name": "M5500OW",
+    "modelId": "M5500",
+    "name": "M5500",
     "collection": "Marquee",
     "speakerType": "lo-z",
     "specsUnavailable": true
@@ -1358,45 +1379,6 @@ export const SPEAKERS: SpeakerModel[] = [
     "impedance": 8
   },
   {
-    "modelId": "PP50",
-    "name": "PP50",
-    "collection": "Professional",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      30,
-      15,
-      7.5,
-      3.75
-    ]
-  },
-  {
-    "modelId": "PP60",
-    "name": "PP60",
-    "collection": "Professional",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      60,
-      30,
-      15,
-      7.5
-    ]
-  },
-  {
-    "modelId": "PP80",
-    "name": "PP80",
-    "collection": "Professional",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      60,
-      30,
-      15,
-      7.5
-    ]
-  },
-  {
     "modelId": "TF37DTEX",
     "name": "TF37DTEX",
     "collection": "ThinFit",
@@ -1436,21 +1418,27 @@ export const SPEAKERS: SpeakerModel[] = [
     "name": "Blends602",
     "collection": "BLENDS",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "sensitivity": 83,
+    "maxWatts": 50
   },
   {
     "modelId": "Blends802",
     "name": "Blends802",
     "collection": "BLENDS",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "sensitivity": 83,
+    "maxWatts": 60
   },
   {
     "modelId": "Blends803",
     "name": "Blends803",
     "collection": "BLENDS",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "sensitivity": 83,
+    "maxWatts": 80
   },
   {
     "modelId": "P80DT",
@@ -1470,7 +1458,10 @@ export const SPEAKERS: SpeakerModel[] = [
       15,
       7.5,
       3.8
-    ]
+    ],
+    "sensitivity": 89,
+    "maxWatts": 30,
+    "coverageAngle": 120
   },
   {
     "modelId": "PC60",
@@ -1483,7 +1474,10 @@ export const SPEAKERS: SpeakerModel[] = [
       30,
       15,
       7.5
-    ]
+    ],
+    "sensitivity": 91,
+    "maxWatts": 40,
+    "coverageAngle": 115
   },
   {
     "modelId": "PC60S",
@@ -1496,7 +1490,10 @@ export const SPEAKERS: SpeakerModel[] = [
       30,
       15,
       7.5
-    ]
+    ],
+    "sensitivity": 87,
+    "maxWatts": 40,
+    "coverageAngle": 90
   },
   {
     "modelId": "PC80",
@@ -1509,41 +1506,43 @@ export const SPEAKERS: SpeakerModel[] = [
       30,
       15,
       7.5
-    ]
-  },
-  {
-    "modelId": "PCSUB8",
-    "name": "PCSUB8",
-    "collection": "Pro",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      120,
-      60,
-      30,
-      15
-    ]
+    ],
+    "sensitivity": 92,
+    "maxWatts": 60,
+    "coverageAngle": 100
   },
   {
     "modelId": "PP50",
     "name": "PP50",
     "collection": "Pro",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [30, 15, 7.5, 3.75],
+    "sensitivity": 87,
+    "maxWatts": 50,
+    "coverageAngle": 120
   },
   {
     "modelId": "PP60",
     "name": "PP60",
     "collection": "Pro",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [60, 30, 15, 7.5],
+    "sensitivity": 88,
+    "maxWatts": 65,
+    "coverageAngle": 120
   },
   {
     "modelId": "PP80",
     "name": "PP80",
     "collection": "Pro",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [60, 30, 15, 7.5],
+    "sensitivity": 90,
+    "maxWatts": 100,
+    "coverageAngle": 110
   },
   {
     "modelId": "PS50",
@@ -1556,7 +1555,10 @@ export const SPEAKERS: SpeakerModel[] = [
       15,
       7.5,
       3.75
-    ]
+    ],
+    "sensitivity": 89,
+    "maxWatts": 30,
+    "coverageAngle": 100
   },
   {
     "modelId": "PS60",
@@ -1569,7 +1571,10 @@ export const SPEAKERS: SpeakerModel[] = [
       30,
       15,
       7.5
-    ]
+    ],
+    "sensitivity": 92,
+    "maxWatts": 40,
+    "coverageAngle": 100
   },
   {
     "modelId": "PS80",
@@ -1582,216 +1587,160 @@ export const SPEAKERS: SpeakerModel[] = [
       40,
       20,
       10
-    ]
+    ],
+    "sensitivity": 92,
+    "maxWatts": 60,
+    "coverageAngle": 70
   },
   {
-    "modelId": "6.5HD2-AW-L-4ohm-BK",
-    "name": "6.5HD2-AW-L-4ohm-BK",
-    "collection": "HD",
+    "modelId": "6.5HD2-4ohm",
+    "name": "6.5HD2-4ohm",
+    "collection": "AMBI",
     "speakerType": "lo-z",
-    "impedance": 4
-  },
-  {
-    "modelId": "6.5HD2-AW-L-70V-BK",
-    "name": "6.5HD2-AW-L-70V-BK",
-    "collection": "HD",
-    "speakerType": "lo-z",
-    "specsUnavailable": true
-  },
-  {
-    "modelId": "6.5HD2-AW-S-4ohm-BK",
-    "name": "6.5HD2-AW-S-4ohm-BK",
-    "collection": "HD",
-    "speakerType": "lo-z",
-    "impedance": 4
-  },
-  {
-    "modelId": "6.5HD2-AW-S-70V-BK",
-    "name": "6.5HD2-AW-S-70V-BK",
-    "collection": "HD",
-    "speakerType": "tappable",
     "impedance": 4,
-    "tapOptions": [
-      70,
-      100
-    ]
+    "sensitivity": 95,
+    "maxWatts": 200,
+    "coverageAngle": 110
   },
   {
-    "modelId": "6.5HD-AW-L-70V-BK",
-    "name": "6.5HD-AW-L-70V-BK",
-    "collection": "HD",
+    "modelId": "6.5HD2-70V",
+    "name": "6.5HD2-70V",
+    "collection": "AMBI",
+    "speakerType": "lo-z",
+    "specsUnavailable": true,
+    "sensitivity": 95,
+    "maxWatts": 200,
+    "coverageAngle": 110
+  },
+  {
+    "modelId": "6.5HD-70V",
+    "name": "6.5HD-70V",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
-    "tapOptions": [
-      70,
-      100
-    ]
+    "tapOptions": [70, 100],
+    "sensitivity": 89,
+    "maxWatts": 100,
+    "coverageAngle": 110
   },
   {
-    "modelId": "6.5HD-AW-L-8ohm-BK",
-    "name": "6.5HD-AW-L-8ohm-BK",
-    "collection": "HD",
+    "modelId": "6.5HD-8ohm",
+    "name": "6.5HD-8ohm",
+    "collection": "AMBI",
     "speakerType": "lo-z",
-    "impedance": 8
-  },
-  {
-    "modelId": "6.5HD-AW-S-70V-BK",
-    "name": "6.5HD-AW-S-70V-BK",
-    "collection": "HD",
-    "speakerType": "tappable",
     "impedance": 8,
-    "tapOptions": [
-      70,
-      100
-    ]
+    "sensitivity": 89,
+    "maxWatts": 100,
+    "coverageAngle": 110
   },
   {
-    "modelId": "6.5HD-AW-S-8ohm-BK",
-    "name": "6.5HD-AW-S-8ohm-BK",
-    "collection": "HD",
-    "speakerType": "lo-z",
-    "impedance": 8
-  },
-  {
-    "modelId": "ALSB106BLK",
-    "name": "ALSB106BLK",
-    "collection": "Seasons",
+    "modelId": "ALSB106",
+    "name": "ALSB106",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [
-      70,
-      200,
-      100,
-      100,
-      200,
-      100
-    ]
+    "tapOptions": [200, 100, 70]
   },
   {
     "modelId": "ALSB64",
     "name": "ALSB64",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [
-      70,
-      50,
-      50,
-      100,
-      50,
-      50
-    ]
+    "tapOptions": [100, 70, 50]
   },
   {
     "modelId": "ALSB85",
     "name": "ALSB85",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [
-      70,
-      100,
-      50,
-      100,
-      100,
-      50
-    ]
+    "tapOptions": [100, 70, 50]
   },
   {
     "modelId": "LSR40",
     "name": "LSR40",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
       70,
       50
-    ]
+    ],
+    "sensitivity": 85,
+    "maxWatts": 50
   },
   {
     "modelId": "LSR60",
     "name": "LSR60",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
       70,
       75
-    ]
+    ],
+    "sensitivity": 88,
+    "maxWatts": 75
   },
   {
     "modelId": "LSR80",
     "name": "LSR80",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
       70,
       100
-    ]
+    ],
+    "sensitivity": 89,
+    "maxWatts": 100
   },
   {
-    "modelId": "AM5600IW",
-    "name": "AM5600IW",
-    "collection": "Marquee",
+    "modelId": "AM5600",
+    "name": "AM5600",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
-    "modelId": "AM3600IW",
-    "name": "AM3600IW",
-    "collection": "Marquee",
+    "modelId": "AM3600",
+    "name": "AM3600",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
-    "modelId": "AM650OWA",
-    "name": "AM650OWA",
-    "collection": "Marquee",
+    "modelId": "AM6500A",
+    "name": "AM6500A",
+    "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
-    "modelId": "LSH40BL",
-    "name": "LSH40BL",
+    "modelId": "ASM63",
+    "name": "ASM63",
     "collection": "AMBI",
     "speakerType": "lo-z",
     "impedance": 8
   },
   {
-    "modelId": "LSH60BL",
-    "name": "LSH60BL",
+    "modelId": "ASM63SUB",
+    "name": "ASM63SUB",
     "collection": "AMBI",
     "speakerType": "lo-z",
-    "impedance": 8
-  },
-  {
-    "modelId": "LSH80BL",
-    "name": "LSH80BL",
-    "collection": "AMBI",
-    "speakerType": "lo-z",
-    "impedance": 8
-  },
-  {
-    "modelId": "ASM63BL",
-    "name": "ASM63BL",
-    "collection": "Seasons",
-    "speakerType": "lo-z",
-    "impedance": 8
-  },
-  {
-    "modelId": "ASM63SUB-BL",
-    "name": "ASM63SUB-BL",
-    "collection": "Seasons",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "sensitivity": 89,
+    "maxWatts": 150
   },
   {
     "modelId": "MOS36K",
     "name": "MOS36K",
     "collection": "MOS",
     "speakerType": "lo-z",
-    "impedance": 4
+    "impedance": 4,
+    "sensitivity": 84,
+    "maxWatts": 75
   },
   {
     "modelId": "MOS36SA250K",
@@ -1809,7 +1758,10 @@ export const SPEAKERS: SpeakerModel[] = [
     "tapOptions": [
       70,
       100
-    ]
+    ],
+    "sensitivity": 89,
+    "maxWatts": 100,
+    "coverageAngle": 100
   },
   {
     "modelId": "LSH60",
@@ -1820,7 +1772,10 @@ export const SPEAKERS: SpeakerModel[] = [
     "tapOptions": [
       70,
       75
-    ]
+    ],
+    "sensitivity": 88,
+    "maxWatts": 75,
+    "coverageAngle": 110
   },
   {
     "modelId": "LSH40",
@@ -1831,7 +1786,10 @@ export const SPEAKERS: SpeakerModel[] = [
     "tapOptions": [
       70,
       50
-    ]
+    ],
+    "sensitivity": 85,
+    "maxWatts": 50,
+    "coverageAngle": 120
   }
 ];
 
@@ -1841,28 +1799,36 @@ export const SUBS: SpeakerModel[] = [
     "name": "10BP-IG-70V",
     "collection": "Seasons",
     "speakerType": "lo-z",
-    "specsUnavailable": true
+    "specsUnavailable": true,
+    "sensitivity": 91,
+    "maxWatts": 300
   },
   {
     "modelId": "10BP-IG-8ohm",
     "name": "10BP-IG-8ohm",
     "collection": "Seasons",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "sensitivity": 91,
+    "maxWatts": 300
   },
   {
     "modelId": "10HDR-AW-70V",
     "name": "10HDR-AW-70V",
     "collection": "Seasons",
     "speakerType": "lo-z",
-    "specsUnavailable": true
+    "specsUnavailable": true,
+    "sensitivity": 97,
+    "maxWatts": 300
   },
   {
     "modelId": "10HDR-AW-8ohm",
     "name": "10HDR-AW-8ohm",
     "collection": "Seasons",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "sensitivity": 97,
+    "maxWatts": 300
   },
   {
     "modelId": "12BP-IG-70v KIT",
@@ -1872,8 +1838,8 @@ export const SUBS: SpeakerModel[] = [
     "specsUnavailable": true
   },
   {
-    "modelId": "12BP-IG : 12BP-IG-8ohm",
-    "name": "12BP-IG : 12BP-IG-8ohm",
+    "modelId": "12BP-IG-8ohm",
+    "name": "12BP-IG-8ohm",
     "collection": "Seasons",
     "speakerType": "lo-z",
     "impedance": 8
@@ -1883,14 +1849,18 @@ export const SUBS: SpeakerModel[] = [
     "name": "12HDR-AW-70V",
     "collection": "Seasons",
     "speakerType": "lo-z",
-    "specsUnavailable": true
+    "specsUnavailable": true,
+    "sensitivity": 91,
+    "maxWatts": 1200
   },
   {
     "modelId": "12HDR-AW-8ohm",
     "name": "12HDR-AW-8ohm",
     "collection": "Seasons",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "sensitivity": 91,
+    "maxWatts": 1200
   },
   {
     "modelId": "AMD10IWSUB",
@@ -1932,19 +1902,6 @@ export const SUBS: SpeakerModel[] = [
     ]
   },
   {
-    "modelId": "PPSUB8",
-    "name": "PPSUB8",
-    "collection": "Professional",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [
-      120,
-      60,
-      30,
-      15
-    ]
-  },
-  {
     "modelId": "SUBD10",
     "name": "SUBD10",
     "collection": "Deep",
@@ -1968,7 +1925,9 @@ export const SUBS: SpeakerModel[] = [
       300,
       150,
       75
-    ]
+    ],
+    "sensitivity": 94,
+    "maxWatts": 300
   },
   {
     "modelId": "SUBV10P",
@@ -2009,8 +1968,21 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "PPSUB8",
     "name": "PPSUB8",
     "collection": "Pro",
-    "speakerType": "lo-z",
-    "impedance": 8
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [120, 60, 30, 15],
+    "sensitivity": 90,
+    "maxWatts": 125
+  },
+  {
+    "modelId": "PCSUB8",
+    "name": "PCSUB8",
+    "collection": "Pro",
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [120, 60, 30, 15],
+    "sensitivity": 90,
+    "maxWatts": 125
   }
 ];
 

@@ -23,12 +23,13 @@ function SpeakerNodeInner({ id, data }: NodeProps) {
 
   const isTappable = model.speakerType === 'tappable'
   const isHiZ = model.speakerType === 'hi-z'
+  const { selectedMode } = data as SpeakerNodeData
 
   const displayName = cleanSpeakerName(model.name, model.collection)
 
-  // Amber border if tappable and no tap selected
-  const needsTap = isTappable && !selectedTap
-  const borderColor = needsTap ? 'var(--amber)' : 'var(--border)'
+  // Amber border if tappable and mode not yet chosen (or 70v chosen but no tap)
+  const needsConfig = isTappable && (!selectedMode || (selectedMode === '70v' && !selectedTap))
+  const borderColor = needsConfig ? 'var(--amber)' : 'var(--border)'
 
   return (
     <div
@@ -122,22 +123,45 @@ function SpeakerNodeInner({ id, data }: NodeProps) {
               </span>
             </>
           )}
+          {model.sensitivity !== undefined && (
+            <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{model.sensitivity} dB/W/m</span>
+          )}
+        </div>
+      )}
+
+      {/* Mode toggle — tappable speakers only */}
+      {isTappable && (
+        <div className="nodrag" style={{ padding: '5px 8px', borderTop: '1px solid var(--border)', display: 'flex', gap: 4 }}>
+          {!selectedMode && (
+            <span style={{ fontSize: 10, color: 'var(--amber)', marginRight: 4, alignSelf: 'center' }}>⚠ Select mode:</span>
+          )}
+          {(['lo-z', '70v'] as const).map(m => (
+            <button
+              key={m}
+              className="nodrag"
+              onClick={() => setTap(id, m, m === 'lo-z' ? undefined : undefined)}
+              style={{
+                padding: '2px 8px',
+                fontSize: 11,
+                borderRadius: 3,
+                border: `1px solid ${selectedMode === m ? (m === 'lo-z' ? 'var(--blue)' : 'var(--amber)') : 'var(--border)'}`,
+                background: selectedMode === m ? (m === 'lo-z' ? 'rgba(74,143,212,0.15)' : 'rgba(245,158,11,0.15)') : 'var(--surface-2)',
+                color: selectedMode === m ? (m === 'lo-z' ? 'var(--blue)' : 'var(--amber)') : 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontWeight: selectedMode === m ? 700 : 400,
+              }}
+            >
+              {m === 'lo-z' ? 'Lo-Z' : '70V'}
+            </button>
+          ))}
         </div>
       )}
 
       {/* Input port rows — left side */}
       <div>
-        {/* Lo-Z In — shown for lo-z and tappable */}
-        {!isHiZ && (
-          <div
-            style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '5px 8px 5px 20px',
-              gap: 6,
-            }}
-          >
+        {/* Lo-Z In — shown for lo-z speakers, and tappable in lo-z mode (or no mode yet) */}
+        {!isHiZ && (!isTappable || selectedMode !== '70v') && (
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '5px 8px 5px 20px', gap: 6 }}>
             <Handle
               type="target"
               position={Position.Left}
@@ -148,15 +172,15 @@ function SpeakerNodeInner({ id, data }: NodeProps) {
           </div>
         )}
 
-        {/* Hi-Z In — shown for hi-z and tappable */}
-        {(isHiZ || isTappable) && (
+        {/* Hi-Z In — shown for hi-z speakers, and tappable in 70v mode (or no mode yet) */}
+        {(isHiZ || (isTappable && selectedMode !== 'lo-z')) && (
           <div
             style={{
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
               padding: '5px 8px 5px 20px',
-              borderTop: isTappable ? '1px solid var(--border)' : 'none',
+              borderTop: isTappable && selectedMode !== '70v' ? '1px solid var(--border)' : 'none',
               gap: 6,
             }}
           >
@@ -171,16 +195,11 @@ function SpeakerNodeInner({ id, data }: NodeProps) {
         )}
       </div>
 
-      {/* Watt tap selector — tappable speakers only */}
-      {isTappable && model.tapOptions && (
-        <div
-          className="nodrag"
-          style={{ padding: '6px 8px', borderTop: '1px solid var(--border)' }}
-        >
-          {needsTap && (
-            <div style={{ color: 'var(--amber)', fontSize: 11, marginBottom: 4 }}>
-              ⚠ Select 70V tap wattage
-            </div>
+      {/* Watt tap selector — only when 70V mode selected */}
+      {isTappable && selectedMode === '70v' && model.tapOptions && (
+        <div className="nodrag" style={{ padding: '6px 8px', borderTop: '1px solid var(--border)' }}>
+          {!selectedTap && (
+            <div style={{ color: 'var(--amber)', fontSize: 11, marginBottom: 4 }}>⚠ Select 70V tap wattage</div>
           )}
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {model.tapOptions.map(w => (
@@ -240,8 +259,17 @@ function SpeakerNodeInner({ id, data }: NodeProps) {
               {!model.specsUnavailable && model.impedance !== undefined && (
                 <InfoRow label="Impedance" value={`${model.impedance}Ω`} />
               )}
+              {!model.specsUnavailable && model.maxWatts !== undefined && (
+                <InfoRow label="Power handling" value={`${model.maxWatts}W`} />
+              )}
               {!model.specsUnavailable && model.tapOptions && model.tapOptions.length > 0 && (
                 <InfoRow label="70V Taps" value={model.tapOptions.map(w => `${w}W`).join(', ')} />
+              )}
+              {model.sensitivity !== undefined && (
+                <InfoRow label="Sensitivity" value={`${model.sensitivity} dB/W/m`} />
+              )}
+              {model.coverageAngle !== undefined && (
+                <InfoRow label="Coverage" value={`${model.coverageAngle}°`} />
               )}
             </tbody>
           </table>
