@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { applyNodeChanges, applyEdgeChanges } from '@xyflow/react'
 import type { Node, Edge, NodeChange, EdgeChange, Connection } from '@xyflow/react'
-import { AMPS, SPEAKERS, SUBS, MUSIC_SOURCE, type AmpModel, type SpeakerModel } from '../data/catalog'
+import { AMPS, AMPS_SORTED, SPEAKERS, SUBS, MUSIC_SOURCE, type AmpModel, type SpeakerModel } from '../data/catalog'
 import { validateLoZZone, validateHiZZone, type ZoneStatus } from '../utils/validation'
 
 // ── Node data types ──────────────────────────────────────────────────────────
@@ -264,11 +264,11 @@ export const useStore = create<StoreState>((set, get) => ({
     }))
   },
 
-  setTap: (nodeId, _mode, watts) => {
+  setTap: (nodeId, mode, watts) => {
     set(state => ({
       nodes: state.nodes.map(n => {
         if (n.id !== nodeId) return n
-        return { ...n, data: { ...n.data, selectedTap: watts } }
+        return { ...n, data: { ...n.data, selectedMode: mode, selectedTap: mode === 'lo-z' ? undefined : watts } }
       }),
     }))
   },
@@ -574,7 +574,7 @@ export const useStore = create<StoreState>((set, get) => ({
 }))
 
 // Catalog exports for sidebar use
-export const CATALOG_AMPS = AMPS
+export const CATALOG_AMPS = AMPS_SORTED
 export const CATALOG_SPEAKERS = SPEAKERS
 export const CATALOG_SUBS = SUBS
 export const CATALOG_SOURCE = MUSIC_SOURCE

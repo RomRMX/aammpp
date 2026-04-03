@@ -143,9 +143,23 @@ function ContextPanel() {
     if (redMsg)        { icon = '✕'; message = redMsg;   msgType = 'error' }
     else if (amberMsg) { icon = '△'; message = amberMsg; msgType = 'warn'  }
     else {
-      const sc = speakerNodes.length, ac = ampNodes.length
+      const sc = speakerNodes.length
       icon = '✓'
-      message = `All zones nominal — ${sc} speaker${sc !== 1 ? 's' : ''} across ${ac} amp${ac !== 1 ? 's' : ''}. Ready to export BOM.`
+      const ampDesc = ampNodes.map(n => {
+        const m = (n.data as AmpNodeData).model
+        const loZ = m.channels.filter(c => c.outputMode === 'lo-z')
+        const hiZ = m.channels.filter(c => c.outputMode === 'hi-z')
+        const parts: string[] = []
+        if (loZ.length) parts.push(`${loZ.length}× lo-z ${loZ[0].maxWatts ?? '?'}W`)
+        if (hiZ.length) parts.push(`${hiZ.length}× hi-z ${hiZ[0].hiZWatts ?? '?'}W`)
+        const why = m.modelId.startsWith('ProA125') ? 'compact fit'
+          : m.modelId.startsWith('ProA250') ? 'mid-power fit'
+          : m.modelId.startsWith('ProA1000') ? 'high-power fit'
+          : m.modelId.startsWith('ProA1200') ? 'max-power fit'
+          : m.series ?? 'selected'
+        return `${m.name} (${parts.join(', ')} — ${why})`
+      }).join(' + ')
+      message = `All zones nominal — ${ampDesc} · ${sc} speaker${sc !== 1 ? 's' : ''}. Ready to export BOM.`
       msgType = 'ok'
     }
   }

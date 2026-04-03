@@ -1584,14 +1584,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [
-      70,
-      200,
-      100,
-      100,
-      200,
-      100
-    ]
+    "tapOptions": [200, 100, 70]
   },
   {
     "modelId": "ALSB64",
@@ -1599,14 +1592,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [
-      70,
-      50,
-      50,
-      100,
-      50,
-      50
-    ]
+    "tapOptions": [100, 70, 50]
   },
   {
     "modelId": "ALSB85",
@@ -1614,14 +1600,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "AMBI",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [
-      70,
-      100,
-      50,
-      100,
-      100,
-      50
-    ]
+    "tapOptions": [100, 70, 50]
   },
   {
     "modelId": "LSR40",
