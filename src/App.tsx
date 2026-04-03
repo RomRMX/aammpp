@@ -4,11 +4,12 @@ import {
   Background,
   BackgroundVariant,
   Controls,
-  MiniMap,
+  Panel,
   useReactFlow,
+  useViewport,
   ReactFlowProvider,
 } from '@xyflow/react'
-import type { Connection, Edge, IsValidConnection } from '@xyflow/react'
+import type { Connection, Edge, IsValidConnection, OnSelectionChangeParams } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
 import { useStore, type AmpNodeData, type SpeakerNodeData, type AppNode } from './hooks/useStore'
@@ -17,14 +18,24 @@ import type { PortMeta } from './utils/validation'
 import { AmpNode } from './components/AmpNode'
 import { SpeakerNode } from './components/SpeakerNode'
 import { SourceNode } from './components/SourceNode'
+import { ZoneNode } from './components/ZoneNode'
+import { DeletableEdge } from './components/DeletableEdge'
 import { Sidebar } from './components/Sidebar'
 import { BomModal } from './components/BomModal'
 
+// ── Node + edge type registries ───────────────────────────────────────────────
+
 const NODE_TYPES = {
-  ampNode: AmpNode,
+  ampNode:    AmpNode,
   speakerNode: SpeakerNode,
   sourceNode: SourceNode,
+  zoneNode:   ZoneNode,
 }
+
+// Override the built-in 'default' edge so ALL edges get the deletable UX
+const EDGE_TYPES = { default: DeletableEdge }
+
+// ── Port-meta resolver (for isValidConnection) ────────────────────────────────
 
 function buildPortMetaResolver(nodes: AppNode[]) {
   return (nodeId: string, handleId: string): PortMeta | undefined => {
@@ -57,44 +68,140 @@ function buildPortMetaResolver(nodes: AppNode[]) {
       const sigType = spkData.model.speakerType === 'hi-z' ? 'speaker-hiz' : 'speaker-loz'
       return { deviceId: nodeId, portId: handleId, signalType: sigType, direction: 'input' }
     } else if (d.kind === 'source') {
-      if (handleId === 'aes-out') {
-        return { deviceId: nodeId, portId: handleId, signalType: 'digital', direction: 'output' }
-      }
       return { deviceId: nodeId, portId: handleId, signalType: 'analog', direction: 'output' }
     }
     return undefined
   }
 }
 
+// ── Static maps ───────────────────────────────────────────────────────────────
+
 const STATUS_LABEL: Record<string, string> = { green: 'OK', amber: 'MARGINAL', red: 'FAULT' }
 const STATUS_COLOR: Record<string, string> = { green: '#4caf50', amber: '#f59e0b', red: '#ef4444' }
 
-const HINT_STEPS = [
-  { icon: '⬡', text: 'Drag a device from the sidebar onto the canvas' },
-  { icon: '◎', text: 'Click a port handle to start a wire' },
-  { icon: '✕', text: 'Click a wire to delete it' },
-  { icon: '⌦', text: 'Select a node and press Delete to remove it' },
-]
+// ── Zoom label ────────────────────────────────────────────────────────────────
+
+function ZoomLabel() {
+  const { zoom } = useViewport()
+  return (
+    <Panel position="bottom-left" style={{ margin: 0, padding: 0, pointerEvents: 'none' }}>
+      <div
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 4,
+          padding: '2px 8px',
+          fontSize: 11,
+          color: 'var(--text-secondary)',
+          userSelect: 'none',
+        }}
+      >
+        {Math.round(zoom * 100)}%
+      </div>
+    </Panel>
+  )
+}
+
+// ── Context guidance panel ────────────────────────────────────────────────────
+
+type MsgType = 'info' | 'warn' | 'error' | 'ok'
+const PANEL_COLORS: Record<MsgType, { bg: string; border: string; text: string }> = {
+  info:  { bg: 'rgba(74,143,212,0.10)',  border: 'var(--blue)',  text: 'var(--blue)'  },
+  warn:  { bg: 'rgba(245,158,11,0.10)',  border: 'var(--amber)', text: 'var(--amber)' },
+  error: { bg: 'rgba(239,68,68,0.10)',   border: 'var(--red)',   text: 'var(--red)'   },
+  ok:    { bg: 'rgba(76,175,80,0.10)',   border: 'var(--green)', text: 'var(--green)' },
+}
+
+function ContextPanel() {
+  const nodes                = useStore(s => s.nodes)
+  const getChannelZoneStatus = useStore(s => s.getChannelZoneStatus)
+
+  const ampNodes     = nodes.filter(n => n.data.kind === 'amp')
+  const speakerNodes = nodes.filter(n => n.data.kind === 'speaker')
+  const sourceNodes  = nodes.filter(n => n.data.kind === 'source')
+
+  let icon    = ''
+  let message = ''
+  let msgType: MsgType = 'info'
+
+  if (nodes.filter(n => n.data.kind !== 'zone').length === 0) {
+    icon = '⬡'; message = 'Drag speakers onto the canvas, then use ◻ Select → ⬚ Zone to group and auto-wire'; msgType = 'info'
+  } else if (ampNodes.length > 0 && sourceNodes.length === 0) {
+    icon = '▶'; message = 'Drop a Source from the sidebar to feed signal into your amp'; msgType = 'warn'
+  } else if (speakerNodes.length > 0 && ampNodes.length === 0) {
+    icon = '◆'; message = 'Speakers placed — use ◻ Select to lasso them, then ⬚ Zone to auto-wire an amp'; msgType = 'info'
+  } else {
+    let redMsg = '', amberMsg = ''
+    for (const ampNode of ampNodes) {
+      const model = (ampNode.data as AmpNodeData).model
+      for (const ch of model.channels) {
+        const { status, detail, loadPercent } = getChannelZoneStatus(ampNode.id, ch.id, ch.outputMode)
+        if (status === 'red'   && !redMsg)   redMsg   = `${model.name} · ${ch.label} FAULT — ${detail}. Disconnect a speaker or swap to a higher-power amp.`
+        if (status === 'amber' && !amberMsg) amberMsg = `${model.name} · ${ch.label} — ${detail} (${Math.round(loadPercent)}% load). Near capacity.`
+      }
+    }
+    if (redMsg)        { icon = '✕'; message = redMsg;   msgType = 'error' }
+    else if (amberMsg) { icon = '△'; message = amberMsg; msgType = 'warn'  }
+    else {
+      const sc = speakerNodes.length, ac = ampNodes.length
+      icon = '✓'
+      message = `All zones nominal — ${sc} speaker${sc !== 1 ? 's' : ''} across ${ac} amp${ac !== 1 ? 's' : ''}. Ready to export BOM.`
+      msgType = 'ok'
+    }
+  }
+
+  const c = PANEL_COLORS[msgType]
+  return (
+    <Panel position="top-center" style={{ margin: 0, padding: 0, pointerEvents: 'none' }}>
+      <div
+        style={{
+          marginTop: 8,
+          background: c.bg,
+          border: `1px solid ${c.border}`,
+          borderRadius: 5,
+          padding: '5px 14px 5px 10px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          maxWidth: 560,
+        }}
+      >
+        <span style={{ color: c.text, fontSize: 12, flexShrink: 0 }}>{icon}</span>
+        <span style={{ fontSize: 11, color: c.text, lineHeight: 1.5 }}>{message}</span>
+      </div>
+    </Panel>
+  )
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
 
 function AppInner() {
   const { screenToFlowPosition } = useReactFlow()
-  const nodes = useStore(s => s.nodes)
-  const edges = useStore(s => s.edges)
-  const onNodesChange = useStore(s => s.onNodesChange)
-  const onEdgesChange = useStore(s => s.onEdgesChange)
-  const onConnect = useStore(s => s.onConnect)
-  const addAmp = useStore(s => s.addAmp)
-  const addSpeaker = useStore(s => s.addSpeaker)
-  const addSource = useStore(s => s.addSource)
-  const clearCanvas = useStore(s => s.clearCanvas)
-  const getOverallStatus = useStore(s => s.getOverallStatus)
+  const nodes              = useStore(s => s.nodes)
+  const edges              = useStore(s => s.edges)
+  const onNodesChange      = useStore(s => s.onNodesChange)
+  const onEdgesChange      = useStore(s => s.onEdgesChange)
+  const onConnect          = useStore(s => s.onConnect)
+  const addAmp             = useStore(s => s.addAmp)
+  const addSpeaker         = useStore(s => s.addSpeaker)
+  const autoDropSource     = useStore(s => s.autoDropSource)
+  const addZone            = useStore(s => s.addZone)
+  const groupIntoZone      = useStore(s => s.groupIntoZone)
+  const clearCanvas        = useStore(s => s.clearCanvas)
+  const getOverallStatus   = useStore(s => s.getOverallStatus)
 
-  const [showBom, setShowBom] = useState(false)
-  const dragKindRef = useRef<'amp' | 'speaker' | 'sub' | 'source'>('amp')
-  const dragModelRef = useRef<string>('')
+  const [showBom, setShowBom]                       = useState(false)
+  const [zoneModeActive, setZoneModeActive]           = useState(false)
+  const [selectModeActive, setSelectModeActive]       = useState(false)
+  const [zonePreview, setZonePreview]                 = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
+  const [selectedSpeakerIds, setSelectedSpeakerIds]  = useState<string[]>([])
 
-  const overallStatus = getOverallStatus()
+  const dragKindRef    = useRef<'amp' | 'speaker' | 'sub' | 'source'>('amp')
+  const dragModelRef   = useRef<string>('')
+  const canvasRef      = useRef<HTMLDivElement>(null)
+  const zoneCounterRef = useRef(0)
 
+  const overallStatus    = getOverallStatus()
   const portMetaResolver = useMemo(() => buildPortMetaResolver(nodes), [nodes])
 
   const isValidConn: IsValidConnection = useCallback(
@@ -102,10 +209,12 @@ function AppInner() {
     [portMetaResolver]
   )
 
+  // ── Drag-drop from sidebar ──────────────────────────────────────────────────
+
   const onDragStart = useCallback(
     (e: React.DragEvent, modelId: string, kind: 'amp' | 'speaker' | 'sub' | 'source') => {
       dragModelRef.current = modelId
-      dragKindRef.current = kind
+      dragKindRef.current  = kind
       e.dataTransfer.effectAllowed = 'move'
     },
     []
@@ -119,17 +228,82 @@ function AppInner() {
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
-      const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY })
-      const kind = dragKindRef.current
+      const pos     = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+      const kind    = dragKindRef.current
       const modelId = dragModelRef.current
       if (!modelId) return
 
-      if (kind === 'amp') addAmp(modelId, pos)
-      else if (kind === 'source') addSource(pos)
-      else addSpeaker(modelId, kind === 'sub', pos)
+      if (kind === 'amp')         addAmp(modelId, pos)
+      else if (kind === 'source') autoDropSource(pos)
+      else                        addSpeaker(modelId, kind === 'sub', pos)
     },
-    [screenToFlowPosition, addAmp, addSpeaker, addSource]
+    [screenToFlowPosition, addAmp, addSpeaker, autoDropSource]
   )
+
+  // ── Selection tracking ──────────────────────────────────────────────────────
+
+  const onSelectionChange = useCallback(({ nodes: sel }: OnSelectionChangeParams) => {
+    const spkIds = sel
+      .filter(n => (n.data as AppNode['data']).kind === 'speaker')
+      .map(n => n.id)
+    setSelectedSpeakerIds(spkIds)
+  }, [])
+
+  // ── Zone drawing ────────────────────────────────────────────────────────────
+
+  const handleCanvasMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!zoneModeActive) return
+      // Don't start on a node or control
+      if ((e.target as Element).closest('.react-flow__node, .react-flow__controls, .react-flow__edge')) return
+      e.preventDefault()
+      setZonePreview({ x1: e.clientX, y1: e.clientY, x2: e.clientX, y2: e.clientY })
+    },
+    [zoneModeActive]
+  )
+
+  const handleCanvasMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!zonePreview) return
+      setZonePreview(p => p ? { ...p, x2: e.clientX, y2: e.clientY } : null)
+    },
+    [zonePreview]
+  )
+
+  const handleCanvasMouseUp = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!zonePreview) return
+      const start = screenToFlowPosition({ x: zonePreview.x1, y: zonePreview.y1 })
+      const end   = screenToFlowPosition({ x: e.clientX,      y: e.clientY      })
+
+      const x = Math.min(start.x, end.x)
+      const y = Math.min(start.y, end.y)
+      const w = Math.abs(end.x - start.x)
+      const h = Math.abs(end.y - start.y)
+
+      if (w > 50 && h > 50) {
+        zoneCounterRef.current++
+        addZone(`Zone ${zoneCounterRef.current}`, { x, y }, w, h)
+      }
+
+      setZonePreview(null)
+      setZoneModeActive(false)
+    },
+    [zonePreview, screenToFlowPosition, addZone]
+  )
+
+  // Preview rect in screen space (relative to the canvas container)
+  const previewRect = zonePreview && canvasRef.current
+    ? (() => {
+        const rect = canvasRef.current!.getBoundingClientRect()
+        return {
+          left:   Math.min(zonePreview.x1, zonePreview.x2) - rect.left,
+          top:    Math.min(zonePreview.y1, zonePreview.y2) - rect.top,
+          width:  Math.abs(zonePreview.x2 - zonePreview.x1),
+          height: Math.abs(zonePreview.y2 - zonePreview.y1),
+        }
+      })()
+    : null
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg)' }}>
@@ -146,39 +320,91 @@ function AppInner() {
           flexShrink: 0,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--blue)', letterSpacing: '0.05em' }}>
-            ORIGIN
-          </span>
-          <span style={{ fontWeight: 400, fontSize: 14, color: 'var(--text-secondary)' }}>
-            Amp Connect
-          </span>
-        </div>
+        {/* Logo */}
+        <img
+          src="/aammpp_logo.png"
+          alt="AAMMPP"
+          style={{ height: 36, width: 'auto', display: 'block' }}
+        />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Global status badge */}
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '3px 10px',
-              borderRadius: 3,
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '3px 10px', borderRadius: 3,
               background: 'rgba(0,0,0,0.3)',
               border: `1px solid ${STATUS_COLOR[overallStatus]}`,
             }}
           >
-            <span
-              style={{
-                display: 'inline-block',
-                width: 7, height: 7,
-                borderRadius: '50%',
-                background: STATUS_COLOR[overallStatus],
-              }}
-            />
-            <span style={{ fontSize: 11, color: STATUS_COLOR[overallStatus], fontWeight: 600 }}>
-              {STATUS_LABEL[overallStatus]}
-            </span>
+            <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: STATUS_COLOR[overallStatus] }} />
+            <span style={{ fontSize: 11, color: STATUS_COLOR[overallStatus], fontWeight: 600 }}>{STATUS_LABEL[overallStatus]}</span>
           </div>
+
+          {/* Zone selection button — visible when speakers are selected in select mode */}
+          {selectedSpeakerIds.length > 0 && (
+            <button
+              onClick={() => {
+                groupIntoZone(selectedSpeakerIds)
+                setSelectedSpeakerIds([])
+                setSelectModeActive(false)
+              }}
+              style={{
+                padding: '4px 12px',
+                background: 'rgba(76,175,80,0.15)',
+                border: '1px solid var(--green)',
+                color: 'var(--green)',
+                borderRadius: 3,
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+              title="Create zone around selected speakers and auto-wire"
+            >
+              ⬚ Zone {selectedSpeakerIds.length} selected
+            </button>
+          )}
+
+          {/* Select mode toggle — lasso-select speakers, then zone them */}
+          <button
+            onClick={() => {
+              setSelectModeActive(s => !s)
+              setZoneModeActive(false)
+              if (selectModeActive) setSelectedSpeakerIds([])
+            }}
+            style={{
+              padding: '4px 12px',
+              background: selectModeActive ? 'rgba(76,175,80,0.15)' : 'none',
+              border: `1px solid ${selectModeActive ? 'var(--green)' : 'var(--border)'}`,
+              color: selectModeActive ? 'var(--green)' : 'var(--text-secondary)',
+              borderRadius: 3,
+              cursor: 'pointer',
+              fontSize: 12,
+            }}
+            title={selectModeActive ? 'Cancel selection mode' : 'Drag-select speakers to group into a zone'}
+          >
+            {selectModeActive ? '✕ Selecting' : '◻ Select'}
+          </button>
+
+          {/* Zone draw tool toggle */}
+          <button
+            onClick={() => {
+              setZoneModeActive(z => !z)
+              setSelectModeActive(false)
+            }}
+            style={{
+              padding: '4px 12px',
+              background: zoneModeActive ? 'rgba(74,143,212,0.2)' : 'none',
+              border: `1px solid ${zoneModeActive ? 'var(--blue)' : 'var(--border)'}`,
+              color: zoneModeActive ? 'var(--blue)' : 'var(--text-secondary)',
+              borderRadius: 3,
+              cursor: 'pointer',
+              fontSize: 12,
+            }}
+            title={zoneModeActive ? 'Cancel zone drawing' : 'Draw a zone frame'}
+          >
+            {zoneModeActive ? '✕ Cancel Zone' : '⬚ Zone'}
+          </button>
 
           <button
             onClick={clearCanvas}
@@ -221,105 +447,58 @@ function AppInner() {
         {/* Canvas column */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Canvas */}
-          <div style={{ flex: 1, position: 'relative' }}>
+          <div
+            ref={canvasRef}
+            style={{ flex: 1, position: 'relative', cursor: (zoneModeActive || selectModeActive) ? 'crosshair' : undefined }}
+            onMouseDown={handleCanvasMouseDown}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseUp={handleCanvasMouseUp}
+          >
             <ReactFlow
               nodes={nodes}
               edges={edges}
               nodeTypes={NODE_TYPES}
+              edgeTypes={EDGE_TYPES}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               isValidConnection={isValidConn}
               onDrop={onDrop}
               onDragOver={onDragOver}
+              onSelectionChange={onSelectionChange}
               fitView
               deleteKeyCode="Delete"
+              panOnDrag={!zoneModeActive && !selectModeActive}
+              selectionOnDrag={selectModeActive}
               style={{ background: 'var(--bg)' }}
               defaultEdgeOptions={{ style: { stroke: 'var(--blue)', strokeWidth: 2 } }}
+              proOptions={{ hideAttribution: true }}
             >
-              <Background
-                variant={BackgroundVariant.Dots}
-                gap={24}
-                size={1}
-                color="var(--border)"
-              />
-
-              {/* Styled Controls */}
-              <Controls
-                showInteractive={false}
-                style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 6,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              />
-
-              <MiniMap
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-                nodeColor="var(--surface-2)"
-              />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" />
+              <Controls showInteractive={false} />
+              <ZoomLabel />
+              <ContextPanel />
             </ReactFlow>
 
-            {/* Empty canvas hint */}
-            {nodes.length === 0 && (
+            {/* Zone draw preview overlay */}
+            {previewRect && (
               <div
                 style={{
                   position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  left: previewRect.left,
+                  top: previewRect.top,
+                  width: previewRect.width,
+                  height: previewRect.height,
+                  border: '1.5px dashed var(--blue)',
+                  background: 'rgba(74,143,212,0.07)',
+                  borderRadius: 6,
                   pointerEvents: 'none',
-                  gap: 8,
+                  zIndex: 1000,
                 }}
-              >
-                <span style={{ fontSize: 32, opacity: 0.15 }}>⬡</span>
-                <span style={{ color: 'var(--text-dim)', fontSize: 13 }}>
-                  Drag devices from the sidebar onto the canvas
-                </span>
-              </div>
+              />
             )}
           </div>
 
-          {/* Instruction bar */}
-          <div
-            style={{
-              height: 34,
-              background: 'var(--surface)',
-              borderTop: '1px solid var(--border)',
-              display: 'flex',
-              alignItems: 'center',
-              paddingLeft: 16,
-              gap: 0,
-              flexShrink: 0,
-              overflowX: 'auto',
-            }}
-          >
-            {HINT_STEPS.map((step, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  paddingRight: 20,
-                  borderRight: i < HINT_STEPS.length - 1 ? '1px solid var(--border)' : 'none',
-                  marginRight: i < HINT_STEPS.length - 1 ? 20 : 0,
-                  flexShrink: 0,
-                }}
-              >
-                <span style={{ fontSize: 13, color: 'var(--blue)', opacity: 0.7 }}>{step.icon}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
-                  {step.text}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 

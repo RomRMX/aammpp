@@ -1,39 +1,57 @@
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { Handle, Position, useReactFlow } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
 import { useStore, type AmpNodeData } from '../hooks/useStore'
+import { fmtPrice } from '../utils/display'
 
 const STATUS_COLOR: Record<string, string> = {
   green: '#4caf50',
   amber: '#f59e0b',
   red:   '#ef4444',
 }
+const STATUS_LABEL: Record<string, string> = {
+  green: 'OK',
+  amber: 'MARGINAL',
+  red:   'FAULT',
+}
 
 function AmpNodeInner({ id, data }: NodeProps) {
   const { model } = data as AmpNodeData
   const { deleteElements } = useReactFlow()
   const getChannelZoneStatus = useStore(s => s.getChannelZoneStatus)
+  const [showInfo, setShowInfo] = useState(false)
 
   const handleDelete = useCallback(() => {
     deleteElements({ nodes: [{ id }] })
   }, [id, deleteElements])
 
+  const channelStatuses = model.channels.map(ch => ({
+    ch,
+    ...getChannelZoneStatus(id, ch.id, ch.outputMode),
+  }))
+
+  const worstStatus = channelStatuses.reduce<string>((w, { status }) => {
+    if (status === 'red') return 'red'
+    if (status === 'amber' && w !== 'red') return 'amber'
+    return w
+  }, 'green')
+
   return (
     <div
       style={{
         background: 'var(--surface)',
-        border: '1px solid var(--border)',
+        border: `1px solid ${worstStatus === 'green' ? 'var(--border)' : STATUS_COLOR[worstStatus]}`,
         borderRadius: 4,
         minWidth: 260,
         fontFamily: 'system-ui, sans-serif',
         fontSize: 12,
         color: 'var(--text-primary)',
         userSelect: 'none',
+        position: 'relative',
       }}
     >
       {/* Header */}
       <div
-        className="nodrag"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -42,13 +60,6 @@ function AmpNodeInner({ id, data }: NodeProps) {
           background: 'var(--surface-2)',
           borderBottom: '1px solid var(--border)',
           borderRadius: '4px 4px 0 0',
-          cursor: 'grab',
-        }}
-        onMouseDown={e => {
-          // Allow dragging from header but not from delete button
-          if ((e.target as HTMLElement).tagName !== 'BUTTON') {
-            // re-enable drag by removing nodrag
-          }
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -61,116 +72,249 @@ function AmpNodeInner({ id, data }: NodeProps) {
             }}
           />
           <span style={{ fontWeight: 600, fontSize: 13 }}>{model.name}</span>
-          <span
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {/* Per-amp status badge */}
+          <div
             style={{
-              fontSize: 10,
-              color: 'var(--text-secondary)',
-              background: 'var(--blue-dim)',
-              padding: '1px 5px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '1px 7px',
               borderRadius: 3,
+              background: 'rgba(0,0,0,0.3)',
+              border: `1px solid ${STATUS_COLOR[worstStatus]}`,
             }}
           >
-            {model.series.toUpperCase()}
-          </span>
-        </div>
-        <button
-          className="nodrag"
-          onClick={handleDelete}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--text-dim)',
-            cursor: 'pointer',
-            padding: '0 2px',
-            fontSize: 14,
-            lineHeight: 1,
-          }}
-          title="Remove"
-        >
-          ×
-        </button>
-      </div>
-
-      {/* Subtitle */}
-      <div style={{ padding: '3px 8px', color: 'var(--text-secondary)', fontSize: 11, borderBottom: '1px solid var(--border)' }}>
-        {model.subtitle}
-      </div>
-
-      {/* Channels */}
-      <div style={{ padding: '4px 0' }}>
-        {model.channels.map((ch, idx) => {
-          const { status, detail } = getChannelZoneStatus(id, ch.id, ch.outputMode)
-          const handleId = `${ch.id}-out`
-          const isFirst = idx === 0
-
-          return (
-            <div
-              key={ch.id}
+            <span
               style={{
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                padding: '5px 32px 5px 8px',
-                borderTop: isFirst ? 'none' : '1px solid var(--border)',
-                gap: 6,
+                display: 'inline-block',
+                width: 5, height: 5,
+                borderRadius: '50%',
+                background: STATUS_COLOR[worstStatus],
               }}
-            >
-              {/* Zone status dot */}
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: 7, height: 7,
-                  borderRadius: '50%',
-                  background: STATUS_COLOR[status],
-                  flexShrink: 0,
-                }}
-                title={detail}
-              />
+            />
+            <span style={{ fontSize: 10, color: STATUS_COLOR[worstStatus], fontWeight: 600 }}>
+              {STATUS_LABEL[worstStatus]}
+            </span>
+          </div>
 
-              {/* Channel label */}
-              <span style={{ color: 'var(--text-secondary)', flex: 1, textAlign: 'right' }}>
-                {ch.label}
-              </span>
+          {/* Info button */}
+          <button
+            className="nodrag"
+            onClick={() => setShowInfo(v => !v)}
+            style={{
+              background: showInfo ? 'var(--blue-dim)' : 'none',
+              border: `1px solid ${showInfo ? 'var(--blue)' : 'transparent'}`,
+              color: showInfo ? 'var(--blue)' : 'var(--text-dim)',
+              cursor: 'pointer',
+              padding: '0 4px',
+              fontSize: 12,
+              lineHeight: '16px',
+              borderRadius: 3,
+            }}
+            title="Show specs"
+          >
+            ⓘ
+          </button>
 
-              {/* Output handle — right side */}
-              <Handle
-                type="source"
-                position={Position.Right}
-                id={handleId}
-                style={{
-                  right: -5,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: ch.outputMode === 'hi-z' ? 'var(--amber)' : 'var(--blue)',
-                  border: '2px solid var(--surface)',
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                }}
-              />
-            </div>
-          )
-        })}
+          <button
+            className="nodrag"
+            onClick={handleDelete}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-dim)',
+              cursor: 'pointer',
+              padding: '0 2px',
+              fontSize: 14,
+              lineHeight: 1,
+            }}
+            title="Remove"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
-      {/* Input handles — left side (one shared analog input) */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="analog-in"
-        style={{
-          left: -5,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          background: 'var(--blue)',
-          border: '2px solid var(--surface)',
-          width: 10,
-          height: 10,
-          borderRadius: '50%',
-        }}
-      />
+      {/* Body: two-column — inputs left, outputs right */}
+      <div style={{ display: 'flex' }}>
+
+        {/* Left column: Signal In */}
+        <div
+          style={{
+            width: 90,
+            flexShrink: 0,
+            borderRight: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '6px 8px 6px 18px', gap: 6, width: '100%' }}>
+            <Handle
+              type="target"
+              position={Position.Left}
+              id="analog-in"
+              style={{
+                left: -5,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'var(--blue)',
+                border: '2px solid var(--surface)',
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+              }}
+            />
+            <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Signal In</span>
+          </div>
+        </div>
+
+        {/* Right column: output channels with load bars */}
+        <div style={{ flex: 1 }}>
+          {channelStatuses.map(({ ch, status, detail, loadPercent }, idx) => {
+            const handleId = `${ch.id}-out`
+            const watts    = ch.outputMode === 'hi-z' ? ch.hiZWatts : ch.maxWatts
+            const barColor = loadPercent > 100 ? STATUS_COLOR.red
+                           : loadPercent > 85  ? STATUS_COLOR.amber
+                           : STATUS_COLOR.green
+
+            return (
+              <div key={ch.id}>
+                <div
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    padding: '6px 22px 4px 8px',
+                    borderTop: idx > 0 ? '1px solid var(--border)' : 'none',
+                    gap: 5,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: 6, height: 6,
+                      borderRadius: '50%',
+                      background: STATUS_COLOR[status],
+                      flexShrink: 0,
+                    }}
+                    title={detail}
+                  />
+                  {watts !== undefined && (
+                    <span style={{ fontSize: 10, color: 'var(--text-dim)', flexShrink: 0 }}>
+                      {watts}W
+                    </span>
+                  )}
+                  <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>
+                    {ch.label}
+                  </span>
+                  <Handle
+                    type="source"
+                    position={Position.Right}
+                    id={handleId}
+                    style={{
+                      right: -5,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: ch.outputMode === 'hi-z' ? 'var(--amber)' : 'var(--blue)',
+                      border: '2px solid var(--surface)',
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                    }}
+                  />
+                </div>
+
+                {/* Load bar */}
+                <div
+                  style={{
+                    height: 3,
+                    background: 'var(--bg)',
+                    marginBottom: 2,
+                    marginRight: 22,
+                  }}
+                >
+                  {loadPercent > 0 && (
+                    <div
+                      style={{
+                        height: '100%',
+                        width: `${Math.min(loadPercent, 100)}%`,
+                        background: barColor,
+                        borderRadius: 2,
+                        transition: 'width 0.2s ease, background 0.2s ease',
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+      </div>
+
+      {/* Info popover */}
+      {showInfo && (
+        <div
+          className="nodrag nopan"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 'calc(100% + 8px)',
+            zIndex: 100,
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 4,
+            padding: '10px 12px',
+            minWidth: 200,
+            maxWidth: 260,
+            fontSize: 11,
+            color: 'var(--text-primary)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          }}
+        >
+          <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, color: 'var(--blue)' }}>
+            {model.name}
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <tbody>
+              <InfoRow label="Series" value={model.series} />
+              <InfoRow label="Config" value={model.subtitle} />
+              {model.dealer !== undefined && <InfoRow label="Dealer" value={fmtPrice(model.dealer)} />}
+              {model.msrp !== undefined && <InfoRow label="MSRP" value={fmtPrice(model.msrp)} />}
+            </tbody>
+          </table>
+
+          <div style={{ marginTop: 8, borderTop: '1px solid var(--border)', paddingTop: 8 }}>
+            <div style={{ color: 'var(--text-dim)', fontSize: 10, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Channels</div>
+            {model.channels.map(ch => (
+              <div key={ch.id} style={{ marginBottom: 4, padding: '4px 6px', background: 'var(--surface-2)', borderRadius: 3 }}>
+                <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 2 }}>{ch.label}</div>
+                <div style={{ color: 'var(--text-dim)', lineHeight: 1.6 }}>
+                  {ch.outputMode === 'hi-z' ? 'Hi-Z (70V)' : 'Lo-Z'}
+                  {ch.maxWatts !== undefined && ` · ${ch.maxWatts}W`}
+                  {ch.ratedImpedance !== undefined && ` @ ${ch.ratedImpedance}Ω`}
+                  {ch.minImpedance !== undefined && ` (min ${ch.minImpedance}Ω)`}
+                  {ch.hiZWatts !== undefined && ` · 70V: ${ch.hiZWatts}W`}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
+  )
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <tr>
+      <td style={{ color: 'var(--text-dim)', paddingRight: 8, paddingBottom: 3, whiteSpace: 'nowrap' }}>{label}</td>
+      <td style={{ color: 'var(--text-primary)', paddingBottom: 3 }}>{value}</td>
+    </tr>
   )
 }
 

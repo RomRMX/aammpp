@@ -1,32 +1,12 @@
 import { useState } from 'react'
 import { CATALOG_AMPS, CATALOG_SPEAKERS, CATALOG_SUBS, CATALOG_SOURCE } from '../hooks/useStore'
 import type { SpeakerModel } from '../data/catalog'
+import { cleanSpeakerName } from '../utils/display'
 
 interface SidebarProps {
   onDragStart: (e: React.DragEvent, modelId: string, kind: 'amp' | 'speaker' | 'sub' | 'source') => void
 }
 
-// Collection color palette
-const COLLECTION_COLORS: Record<string, string> = {
-  'Composer':     '#7ca5d4',
-  'Director':     '#74b87a',
-  'ThinFit':      '#6ec4c4',
-  'BLENDS':       '#a87ee0',
-  'Seasons':      '#c4a55a',
-  'Pro':          '#d47878',
-  'AMBI':         '#7ec49e',
-  'HD':           '#6ab8d8',
-  'Marquee':      '#c47ca8',
-  'Foundation':   '#8898b8',
-  'Theater':      '#b4a468',
-  'Professional': '#c4a870',
-  'Slim':         '#94b8a8',
-  'Other':        '#888888',
-}
-
-function collectionColor(name: string): string {
-  return COLLECTION_COLORS[name] ?? '#888888'
-}
 
 // Group by collection, filtering out specsUnavailable items
 function groupByCollection(items: SpeakerModel[]): Record<string, SpeakerModel[]> {
@@ -43,17 +23,15 @@ function groupByCollection(items: SpeakerModel[]): Record<string, SpeakerModel[]
 
 function TypeBadge({ model }: { model: SpeakerModel }) {
   if (model.speakerType === 'tappable') {
-    return <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>8Ω/70V</span>
+    return <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>Lo-Z / Hi-Z</span>
   }
   if (model.speakerType === 'hi-z') {
-    return <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>70V</span>
+    return <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>Hi-Z</span>
   }
-  if (model.impedance !== undefined) {
-    return <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 4 }}>{model.impedance}Ω</span>
-  }
-  return <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 4 }}>?Ω</span>
+  return <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 4 }}>Lo-Z</span>
 }
 
+/** Collapsible collection group */
 function CollectionGroup({
   title,
   items,
@@ -65,9 +43,7 @@ function CollectionGroup({
   kind: 'speaker' | 'sub'
   onDragStart: SidebarProps['onDragStart']
 }) {
-  // Start collapsed
   const [open, setOpen] = useState(false)
-  const color = collectionColor(title)
 
   return (
     <div style={{ borderBottom: '1px solid var(--border)' }}>
@@ -79,18 +55,18 @@ function CollectionGroup({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '5px 8px',
-          background: 'none',
+          background: 'var(--surface-2)',
           border: 'none',
-          color,
+          color: 'var(--blue)',
           cursor: 'pointer',
           fontSize: 11,
-          fontWeight: 600,
+          fontWeight: 700,
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
         }}
       >
         <span>{title}</span>
-        <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+        <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
       </button>
 
       {open && (
@@ -103,14 +79,17 @@ function CollectionGroup({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '4px 8px 4px 16px',
+                padding: '5px 8px 5px 14px',
                 cursor: 'grab',
                 borderTop: '1px solid var(--border)',
+                background: 'var(--surface)',
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
             >
-              <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{item.name}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600, flex: 1 }}>
+                {cleanSpeakerName(item.name, item.collection)}
+              </span>
               <TypeBadge model={item} />
             </div>
           ))}
@@ -120,28 +99,53 @@ function CollectionGroup({
   )
 }
 
-function SectionHeader({ label }: { label: string }) {
+/** Top-level collapsible section header */
+function SectionToggle({
+  label,
+  open,
+  onToggle,
+  sticky,
+}: {
+  label: string
+  open: boolean
+  onToggle: () => void
+  sticky?: boolean
+}) {
   return (
-    <div
+    <button
+      onClick={onToggle}
       style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         padding: '6px 8px',
         background: 'var(--bg)',
+        border: 'none',
         borderBottom: '1px solid var(--border)',
+        cursor: 'pointer',
         fontSize: 10,
         fontWeight: 700,
-        color: 'var(--text-dim)',
+        color: 'var(--blue)',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
+        ...(sticky ? { position: 'sticky', top: 0, zIndex: 2 } : {}),
       }}
     >
-      {label}
-    </div>
+      <span>{label}</span>
+      <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
+    </button>
   )
 }
 
 export function Sidebar({ onDragStart }: SidebarProps) {
   const speakerGroups = groupByCollection(CATALOG_SPEAKERS)
-  const subGroups = groupByCollection(CATALOG_SUBS)
+  const subGroups     = groupByCollection(CATALOG_SUBS)
+
+  const [speakersOpen, setSpeakersOpen] = useState(true)
+  const [subsOpen,     setSubsOpen]     = useState(true)
+  const [sourceOpen,   setSourceOpen]   = useState(true)
+  const [ampsOpen,     setAmpsOpen]     = useState(true)
 
   return (
     <div
@@ -156,62 +160,71 @@ export function Sidebar({ onDragStart }: SidebarProps) {
         flexShrink: 0,
       }}
     >
-      {/* Source — pinned top */}
-      <SectionHeader label="Source" />
-      <div
-        draggable
-        onDragStart={e => onDragStart(e, CATALOG_SOURCE.modelId, 'source')}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '6px 8px',
-          cursor: 'grab',
-          borderBottom: '1px solid var(--border)',
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-      >
-        <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginRight: 6 }}>▶</span>
-        <span style={{ fontSize: 12, color: 'var(--text-primary)' }}>{CATALOG_SOURCE.name}</span>
-      </div>
-
-      {/* Scrollable speakers + subs */}
+      {/* Single scrollable area: Speakers → Subwoofers → Source → Amplifiers */}
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        <SectionHeader label="Speakers" />
-        {Object.entries(speakerGroups).map(([col, items]) => (
+
+        {/* Speakers */}
+        <SectionToggle label="Speakers" open={speakersOpen} onToggle={() => setSpeakersOpen(o => !o)} sticky />
+        {speakersOpen && Object.entries(speakerGroups).map(([col, items]) => (
           <CollectionGroup key={col} title={col} items={items} kind="speaker" onDragStart={onDragStart} />
         ))}
 
-        <SectionHeader label="Subwoofers" />
-        {Object.entries(subGroups).map(([col, items]) => (
+        {/* Subwoofers */}
+        <SectionToggle label="Subwoofers" open={subsOpen} onToggle={() => setSubsOpen(o => !o)} sticky />
+        {subsOpen && Object.entries(subGroups).map(([col, items]) => (
           <CollectionGroup key={col} title={col} items={items} kind="sub" onDragStart={onDragStart} />
         ))}
-      </div>
 
-      {/* Amps — fixed bottom, no scroll */}
-      <div style={{ borderTop: '2px solid var(--border)', background: 'var(--surface)' }}>
-        <SectionHeader label="Amplifiers" />
-        <div>
-          {CATALOG_AMPS.map(amp => (
-            <div
-              key={amp.modelId}
-              draggable
-              onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '5px 8px',
-                cursor: 'grab',
-                borderTop: '1px solid var(--border)',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-            >
-              <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{amp.name}</span>
-              <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{amp.subtitle}</span>
-            </div>
-          ))}
-        </div>
+        {/* Source */}
+        <SectionToggle label="Source" open={sourceOpen} onToggle={() => setSourceOpen(o => !o)} sticky />
+        {sourceOpen && (
+          <div
+            draggable
+            onDragStart={e => onDragStart(e, CATALOG_SOURCE.modelId, 'source')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '6px 8px',
+              cursor: 'grab',
+              borderBottom: '1px solid var(--border)',
+              background: 'var(--surface)',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
+          >
+            <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>
+              {CATALOG_SOURCE.name}
+            </span>
+          </div>
+        )}
+
+        {/* Amplifiers */}
+        <SectionToggle label="Amplifiers" open={ampsOpen} onToggle={() => setAmpsOpen(o => !o)} sticky />
+        {ampsOpen && (
+          <div>
+            {CATALOG_AMPS.map((amp, i) => (
+              <div
+                key={amp.modelId}
+                draggable
+                onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '5px 8px',
+                  cursor: 'grab',
+                  borderTop: i === 0 ? 'none' : '1px solid var(--border)',
+                  borderBottom: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
+              >
+                <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{amp.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
       </div>
     </div>
   )
