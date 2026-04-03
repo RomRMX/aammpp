@@ -27,6 +27,7 @@ export interface SpeakerModel {
   modelId: string
   name: string
   collection: string
+  brand?: string
   speakerType: 'lo-z' | 'hi-z' | 'tappable'
   impedance?: number        // Ω nominal
   tapOptions?: number[]     // 70V watt taps (descending)
@@ -997,6 +998,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "C63",
     "name": "C63",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1004,6 +1006,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "C65",
     "name": "C65",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1011,6 +1014,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "C65EX",
     "name": "C65EX",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1018,6 +1022,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "C67",
     "name": "C67",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1025,6 +1030,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "C69",
     "name": "C69",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1032,6 +1038,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "CIW61",
     "name": "CIW61",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1039,6 +1046,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "CIW63",
     "name": "CIW63",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1046,6 +1054,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "CIW65",
     "name": "CIW65",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1053,6 +1062,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D101",
     "name": "D101",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1060,6 +1070,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D103DT",
     "name": "D103DT",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1067,6 +1078,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D105",
     "name": "D105",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1074,6 +1086,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D105EX",
     "name": "D105EX",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1081,6 +1094,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D107",
     "name": "D107",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1088,6 +1102,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D109",
     "name": "D109",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1095,6 +1110,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D39",
     "name": "D39",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 10
   },
@@ -1102,6 +1118,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D51DT",
     "name": "D51DT",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1109,6 +1126,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D53",
     "name": "D53",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1116,6 +1134,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D53DT",
     "name": "D53DT",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1123,6 +1142,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D55",
     "name": "D55",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1130,6 +1150,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D55EX",
     "name": "D55EX",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1137,6 +1158,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D57",
     "name": "D57",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1144,6 +1166,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D57DT/SUR",
     "name": "D57DT/SUR",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1151,6 +1174,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D59",
     "name": "D59",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1158,6 +1182,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D61DT",
     "name": "D61DT",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1165,6 +1190,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D63",
     "name": "D63",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1172,6 +1198,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D63DT/SUR",
     "name": "D63DT/SUR",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1179,6 +1206,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D65",
     "name": "D65",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1186,6 +1214,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D65EX",
     "name": "D65EX",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1193,6 +1222,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D67",
     "name": "D67",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1200,6 +1230,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D69",
     "name": "D69",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1207,6 +1238,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D80DT",
     "name": "D80DT",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1214,6 +1246,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D83",
     "name": "D83",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1221,6 +1254,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D83A",
     "name": "D83A",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1228,6 +1262,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D83AEX",
     "name": "D83AEX",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1235,6 +1270,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D83DT/SUR",
     "name": "D83DT/SUR",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1242,6 +1278,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D83DT/SUR EX",
     "name": "D83DT/SUR EX",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1249,6 +1286,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D83EX",
     "name": "D83EX",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1256,6 +1294,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D85",
     "name": "D85",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1263,6 +1302,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D85EX",
     "name": "D85EX",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1270,6 +1310,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D87",
     "name": "D87",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1277,6 +1318,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "D89",
     "name": "D89",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1284,6 +1326,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "LCR37",
     "name": "LCR37",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1291,6 +1334,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "LCR39",
     "name": "LCR39",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1298,6 +1342,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "LCR65",
     "name": "LCR65",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1305,6 +1350,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "LCR67",
     "name": "LCR67",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1312,13 +1358,15 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "LCR69",
     "name": "LCR69",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
   {
-    "modelId": "M2500IC",
-    "name": "M2500IC",
+    "modelId": "M2500",
+    "name": "M2500",
     "collection": "Marquee",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1326,6 +1374,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "M3500",
     "name": "M3500",
     "collection": "Marquee",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1333,6 +1382,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "M5500",
     "name": "M5500",
     "collection": "Marquee",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1340,6 +1390,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "OSR65",
     "name": "OSR65",
     "collection": "Seasons",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1347,6 +1398,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "OSR85",
     "name": "OSR85",
     "collection": "Seasons",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1354,6 +1406,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "OS50B",
     "name": "OS50B",
     "collection": "Seasons",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1361,6 +1414,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "OS60B",
     "name": "OS60B",
     "collection": "Seasons",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1368,6 +1422,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "OS60DTB",
     "name": "OS60DTB",
     "collection": "Seasons",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1375,6 +1430,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "OS80B",
     "name": "OS80B",
     "collection": "Seasons",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1382,6 +1438,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "TF37DTEX",
     "name": "TF37DTEX",
     "collection": "ThinFit",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1389,6 +1446,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "TF37EX",
     "name": "TF37EX",
     "collection": "ThinFit",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1396,6 +1454,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "TFIW37EX",
     "name": "TFIW37EX",
     "collection": "ThinFit",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1403,6 +1462,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "THTR67",
     "name": "THTR67",
     "collection": "Theater",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1410,6 +1470,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "THTR69",
     "name": "THTR69",
     "collection": "Theater",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 6
   },
@@ -1417,6 +1478,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "Blends602",
     "name": "Blends602",
     "collection": "BLENDS",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 83,
@@ -1426,6 +1488,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "Blends802",
     "name": "Blends802",
     "collection": "BLENDS",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 83,
@@ -1435,6 +1498,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "Blends803",
     "name": "Blends803",
     "collection": "BLENDS",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 83,
@@ -1444,6 +1508,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "P80DT",
     "name": "P80DT",
     "collection": "Producer",
+    "brand": "Origin Pro",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1451,6 +1516,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PC50",
     "name": "PC50",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [
@@ -1467,6 +1533,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PC60",
     "name": "PC60",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [
@@ -1483,6 +1550,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PC60S",
     "name": "PC60S",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [
@@ -1499,6 +1567,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PC80",
     "name": "PC80",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [
@@ -1515,6 +1584,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PP50",
     "name": "PP50",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [30, 15, 7.5, 3.75],
@@ -1526,6 +1596,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PP60",
     "name": "PP60",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [60, 30, 15, 7.5],
@@ -1537,6 +1608,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PP80",
     "name": "PP80",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [60, 30, 15, 7.5],
@@ -1548,6 +1620,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PS50",
     "name": "PS50",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1564,6 +1637,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PS60",
     "name": "PS60",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1580,6 +1654,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "PS80",
     "name": "PS80",
     "collection": "Pro",
+    "brand": "Origin Pro",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1595,7 +1670,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD2-4ohm",
     "name": "6.5HD2-4ohm",
-    "collection": "AMBI",
+    "collection": "HD",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4,
     "sensitivity": 95,
@@ -1605,7 +1681,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD2-70V",
     "name": "6.5HD2-70V",
-    "collection": "AMBI",
+    "collection": "HD",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "specsUnavailable": true,
     "sensitivity": 95,
@@ -1615,7 +1692,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD-70V",
     "name": "6.5HD-70V",
-    "collection": "AMBI",
+    "collection": "HD",
+    "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [70, 100],
@@ -1626,7 +1704,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD-8ohm",
     "name": "6.5HD-8ohm",
-    "collection": "AMBI",
+    "collection": "HD",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 89,
@@ -1636,7 +1715,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ALSB106",
     "name": "ALSB106",
-    "collection": "AMBI",
+    "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [200, 100, 70]
@@ -1644,7 +1724,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ALSB64",
     "name": "ALSB64",
-    "collection": "AMBI",
+    "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [100, 70, 50]
@@ -1652,7 +1733,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ALSB85",
     "name": "ALSB85",
-    "collection": "AMBI",
+    "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
     "tapOptions": [100, 70, 50]
@@ -1660,7 +1742,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "LSR40",
     "name": "LSR40",
-    "collection": "AMBI",
+    "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1673,7 +1756,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "LSR60",
     "name": "LSR60",
-    "collection": "AMBI",
+    "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1686,7 +1770,8 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "LSR80",
     "name": "LSR80",
-    "collection": "AMBI",
+    "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1699,35 +1784,40 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "AM5600",
     "name": "AM5600",
-    "collection": "AMBI",
+    "collection": "Marquee",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
     "modelId": "AM3600",
     "name": "AM3600",
-    "collection": "AMBI",
+    "collection": "Marquee",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
     "modelId": "AM6500A",
     "name": "AM6500A",
-    "collection": "AMBI",
+    "collection": "Marquee",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4
   },
   {
     "modelId": "ASM63",
     "name": "ASM63",
-    "collection": "AMBI",
+    "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8
   },
   {
     "modelId": "ASM63SUB",
     "name": "ASM63SUB",
-    "collection": "AMBI",
+    "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 89,
@@ -1737,22 +1827,17 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "MOS36K",
     "name": "MOS36K",
     "collection": "MOS",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 4,
     "sensitivity": 84,
     "maxWatts": 75
   },
   {
-    "modelId": "MOS36SA250K",
-    "name": "MOS36SA250K",
-    "collection": "MOS",
-    "speakerType": "lo-z",
-    "specsUnavailable": true
-  },
-  {
     "modelId": "LSH80",
     "name": "LSH80",
     "collection": "AMBI",
+    "brand": "Origin Acoustics",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1767,6 +1852,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "LSH60",
     "name": "LSH60",
     "collection": "AMBI",
+    "brand": "Origin Acoustics",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1781,6 +1867,7 @@ export const SPEAKERS: SpeakerModel[] = [
     "modelId": "LSH40",
     "name": "LSH40",
     "collection": "AMBI",
+    "brand": "Origin Acoustics",
     "speakerType": "tappable",
     "impedance": 8,
     "tapOptions": [
@@ -1798,6 +1885,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "10BP-IG-70V",
     "name": "10BP-IG-70V",
     "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "specsUnavailable": true,
     "sensitivity": 91,
@@ -1807,6 +1895,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "10BP-IG-8ohm",
     "name": "10BP-IG-8ohm",
     "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 91,
@@ -1816,6 +1905,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "10HDR-AW-70V",
     "name": "10HDR-AW-70V",
     "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "specsUnavailable": true,
     "sensitivity": 97,
@@ -1825,6 +1915,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "10HDR-AW-8ohm",
     "name": "10HDR-AW-8ohm",
     "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 97,
@@ -1834,6 +1925,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "12BP-IG-70v KIT",
     "name": "12BP-IG-70v KIT",
     "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1841,6 +1933,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "12BP-IG-8ohm",
     "name": "12BP-IG-8ohm",
     "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1848,6 +1941,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "12HDR-AW-70V",
     "name": "12HDR-AW-70V",
     "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "specsUnavailable": true,
     "sensitivity": 91,
@@ -1857,6 +1951,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "12HDR-AW-8ohm",
     "name": "12HDR-AW-8ohm",
     "collection": "Seasons",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 91,
@@ -1866,13 +1961,31 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "AMD10IWSUB",
     "name": "AMD10IWSUB",
     "collection": "Marquee",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4
+  },
+  {
+    "modelId": "Blends800Sub",
+    "name": "Blends800Sub",
+    "collection": "BLENDS",
+    "brand": "Origin Acoustics",
+    "speakerType": "lo-z",
+    "specsUnavailable": true
+  },
+  {
+    "modelId": "BlendsCSUB10",
+    "name": "BlendsCSUB10",
+    "collection": "BLENDS",
+    "brand": "Origin Acoustics",
+    "speakerType": "lo-z",
+    "specsUnavailable": true
   },
   {
     "modelId": "CSUB10R EX",
     "name": "CSUB10R EX",
     "collection": "Composer",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 8
   },
@@ -1880,13 +1993,25 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "DBA10EX",
     "name": "DBA10EX",
     "collection": "Director",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "impedance": 4
+  },
+  {
+    "modelId": "DSUB6X2",
+    "name": "DSUB6X2",
+    "collection": "Deep",
+    "brand": "Origin Acoustics",
+    "speakerType": "lo-z",
+    "impedance": 6,
+    "sensitivity": 90,
+    "maxWatts": 120
   },
   {
     "modelId": "OSUB10",
     "name": "OSUB10",
     "collection": "Seasons",
+    "brand": "Origin Acoustics",
     "speakerType": "hi-z",
     "tapOptions": [
       300
@@ -1896,15 +2021,50 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "OSUB12",
     "name": "OSUB12",
     "collection": "Seasons",
+    "brand": "Origin Acoustics",
     "speakerType": "hi-z",
     "tapOptions": [
       300
     ]
   },
   {
+    "modelId": "PCSUB8",
+    "name": "PCSUB8",
+    "collection": "Pro",
+    "brand": "Origin Pro",
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [120, 60, 30, 15],
+    "sensitivity": 90,
+    "maxWatts": 125
+  },
+  {
+    "modelId": "PPSUB8",
+    "name": "PPSUB8",
+    "collection": "Pro",
+    "brand": "Origin Pro",
+    "speakerType": "tappable",
+    "impedance": 8,
+    "tapOptions": [120, 60, 30, 15],
+    "sensitivity": 90,
+    "maxWatts": 125
+  },
+  {
+    "modelId": "PSUB10X2",
+    "name": "PSUB10X2",
+    "collection": "Pro",
+    "brand": "Origin Acoustics",
+    "speakerType": "tappable",
+    "impedance": 4,
+    "tapOptions": [300, 150, 75],
+    "sensitivity": 94,
+    "maxWatts": 600
+  },
+  {
     "modelId": "SUBD10",
     "name": "SUBD10",
     "collection": "Deep",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1912,6 +2072,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "SUBD8",
     "name": "SUBD8",
     "collection": "Deep",
+    "brand": "Origin Acoustics",
     "speakerType": "lo-z",
     "specsUnavailable": true
   },
@@ -1919,6 +2080,7 @@ export const SUBS: SpeakerModel[] = [
     "modelId": "SUBS10",
     "name": "SUBS10",
     "collection": "Slim",
+    "brand": "Origin Acoustics",
     "speakerType": "tappable",
     "impedance": 4,
     "tapOptions": [
@@ -1928,61 +2090,6 @@ export const SUBS: SpeakerModel[] = [
     ],
     "sensitivity": 94,
     "maxWatts": 300
-  },
-  {
-    "modelId": "SUBV10P",
-    "name": "SUBV10P",
-    "collection": "Value",
-    "speakerType": "lo-z",
-    "specsUnavailable": true
-  },
-  {
-    "modelId": "SUBV12P",
-    "name": "SUBV12P",
-    "collection": "Value",
-    "speakerType": "lo-z",
-    "specsUnavailable": true
-  },
-  {
-    "modelId": "SUBV8P",
-    "name": "SUBV8P",
-    "collection": "Value",
-    "speakerType": "lo-z",
-    "specsUnavailable": true
-  },
-  {
-    "modelId": "Blends800Sub",
-    "name": "Blends800Sub",
-    "collection": "BLENDS",
-    "speakerType": "lo-z",
-    "specsUnavailable": true
-  },
-  {
-    "modelId": "BlendsCSUB10",
-    "name": "BlendsCSUB10",
-    "collection": "BLENDS",
-    "speakerType": "lo-z",
-    "specsUnavailable": true
-  },
-  {
-    "modelId": "PPSUB8",
-    "name": "PPSUB8",
-    "collection": "Pro",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [120, 60, 30, 15],
-    "sensitivity": 90,
-    "maxWatts": 125
-  },
-  {
-    "modelId": "PCSUB8",
-    "name": "PCSUB8",
-    "collection": "Pro",
-    "speakerType": "tappable",
-    "impedance": 8,
-    "tapOptions": [120, 60, 30, 15],
-    "sensitivity": 90,
-    "maxWatts": 125
   }
 ];
 

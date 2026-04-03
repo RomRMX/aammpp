@@ -293,7 +293,11 @@ function AppInner() {
     [zonePreview, screenToFlowPosition, addZone]
   )
 
-  // Preview rect in screen space (relative to the canvas container)
+  // Preview rect in screen space (relative to the canvas container).
+  // We read canvasRef.current during render intentionally: zonePreview is
+  // only set while the user is actively dragging, so every mouse-move event
+  // triggers a re-render and the rect value is always fresh.
+  /* eslint-disable react-hooks/refs */
   const previewRect = zonePreview && canvasRef.current
     ? (() => {
         const rect = canvasRef.current!.getBoundingClientRect()
@@ -305,6 +309,7 @@ function AppInner() {
         }
       })()
     : null
+  /* eslint-enable react-hooks/refs */
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg)' }}>
