@@ -1,0 +1,8 @@
+node_modules/
+EasySchematic/
+EasySchematic.zip
+AVIATOR_BIBLE.xlsx
+scripts/
+AMP BIBLE/
+*.html
+!index.html
