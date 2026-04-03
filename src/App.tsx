@@ -15,6 +15,7 @@ import '@xyflow/react/dist/style.css'
 import { useStore, type AmpNodeData, type SpeakerNodeData, type AppNode } from './hooks/useStore'
 import { isValidConnection as checkConnection } from './utils/validation'
 import type { PortMeta } from './utils/validation'
+import { STATUS_COLOR, STATUS_LABEL, PANEL_COLORS, type MsgType } from './constants/theme'
 import { AmpNode } from './components/AmpNode'
 import { SpeakerNode } from './components/SpeakerNode'
 import { SourceNode } from './components/SourceNode'
@@ -74,11 +75,6 @@ function buildPortMetaResolver(nodes: AppNode[]) {
   }
 }
 
-// ── Static maps ───────────────────────────────────────────────────────────────
-
-const STATUS_LABEL: Record<string, string> = { green: 'OK', amber: 'MARGINAL', red: 'FAULT' }
-const STATUS_COLOR: Record<string, string> = { green: '#4caf50', amber: '#f59e0b', red: '#ef4444' }
-
 // ── Zoom label ────────────────────────────────────────────────────────────────
 
 function ZoomLabel() {
@@ -103,14 +99,6 @@ function ZoomLabel() {
 }
 
 // ── Context guidance panel ────────────────────────────────────────────────────
-
-type MsgType = 'info' | 'warn' | 'error' | 'ok'
-const PANEL_COLORS: Record<MsgType, { bg: string; border: string; text: string }> = {
-  info:  { bg: 'rgba(74,143,212,0.10)',  border: 'var(--blue)',  text: 'var(--blue)'  },
-  warn:  { bg: 'rgba(245,158,11,0.10)',  border: 'var(--amber)', text: 'var(--amber)' },
-  error: { bg: 'rgba(239,68,68,0.10)',   border: 'var(--red)',   text: 'var(--red)'   },
-  ok:    { bg: 'rgba(76,175,80,0.10)',   border: 'var(--green)', text: 'var(--green)' },
-}
 
 function ContextPanel() {
   const nodes                = useStore(s => s.nodes)
@@ -202,7 +190,7 @@ function AppInner() {
   const addZone            = useStore(s => s.addZone)
   const groupIntoZone      = useStore(s => s.groupIntoZone)
   const clearCanvas        = useStore(s => s.clearCanvas)
-  const getOverallStatus   = useStore(s => s.getOverallStatus)
+  const overallStatus      = useStore(s => s.getOverallStatus())
 
   const [showBom, setShowBom]                       = useState(false)
   const [zoneModeActive, setZoneModeActive]           = useState(false)
@@ -215,7 +203,6 @@ function AppInner() {
   const canvasRef      = useRef<HTMLDivElement>(null)
   const zoneCounterRef = useRef(0)
 
-  const overallStatus    = getOverallStatus()
   const portMetaResolver = useMemo(() => buildPortMetaResolver(nodes), [nodes])
 
   const isValidConn: IsValidConnection = useCallback(

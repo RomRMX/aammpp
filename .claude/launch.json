@@ -5,7 +5,7 @@
       "name": "amp-connect",
       "runtimeExecutable": "/usr/local/bin/node",
       "runtimeArgs": ["/Users/rompragasa/Documents/Claude/Projects/aammpp/node_modules/vite/bin/vite.js", "--port", "5173"],
-      "cwd": "/Users/rompragasa/Documents/Claude/Projects/aammpp",
+      "cwd": ".",
       "port": 5173
     }
   ]

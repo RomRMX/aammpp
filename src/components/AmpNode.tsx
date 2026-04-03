@@ -3,17 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
 import { useStore, type AmpNodeData } from '../hooks/useStore'
 import { fmtPrice } from '../utils/display'
-
-const STATUS_COLOR: Record<string, string> = {
-  green: '#4caf50',
-  amber: '#f59e0b',
-  red:   '#ef4444',
-}
-const STATUS_LABEL: Record<string, string> = {
-  green: 'OK',
-  amber: 'MARGINAL',
-  red:   'FAULT',
-}
+import { STATUS_COLOR, STATUS_LABEL } from '../constants/theme'
 
 function AmpNodeInner({ id, data }: NodeProps) {
   const { model, channelWiring } = data as AmpNodeData
