@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+*.local
+.env
+.env.*
+EasySchematic/
+EasySchematic.zip
+Amplifiers - Origin PRO.html
+Origin ProA125* - Dashboard.html
+ProA-Signal-Path-Designer.html
+prd.html
