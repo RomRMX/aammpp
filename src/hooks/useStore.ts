@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { applyNodeChanges, applyEdgeChanges } from '@xyflow/react'
 import type { Node, Edge, NodeChange, EdgeChange, Connection } from '@xyflow/react'
 import { AMPS, AMPS_SORTED, SPEAKERS, SUBS, MUSIC_SOURCE, type AmpModel, type SpeakerModel } from '../data/catalog'
-import { validateLoZZone, validateHiZZone, type ZoneStatus } from '../utils/validation'
+import { validateLoZZone, validateHiZZone, estimateSPL, loZPowerPerSpeaker, type ZoneStatus } from '../utils/validation'
 import { ZONE_COLORS } from '../constants/theme'
 
 // ── Node data types ──────────────────────────────────────────────────────────
@@ -51,13 +51,22 @@ export interface ChannelZoneStatus {
   detail: string
 }
 
+export interface ChannelStatus {
+  status: ZoneStatus
+  detail: string
+  loadPercent: number
+  speakerCount: number
+  /** Estimated SPL range at 1m in dB, when speaker sensitivity data is available */
+  splRange?: { min: number; max: number }
+}
+
 export function computeChannelStatus(
   ampNodeId: string,
   channelId: string,
   channelOutputMode: 'lo-z' | 'hi-z',
   edges: AppEdge[],
   nodes: AppNode[]
-): { status: ZoneStatus; detail: string; loadPercent: number; speakerCount: number } {
+): ChannelStatus {
   const handleId = `${channelId}-out`
   const outEdges = edges.filter(e => e.source === ampNodeId && e.sourceHandle === handleId)
 
@@ -86,7 +95,21 @@ export function computeChannelStatus(
     const minImp = channel.minImpedance ?? 4
     const loadPercent = speakerCount === 0 ? 0 : Math.min((minImp / result.zLoad) * 100, 200)
     const wiringLabel = speakerCount >= 2 ? ` (${wiring})` : ''
-    return { status: result.status, detail: (result.reason ?? `${speakerCount} speaker(s)`) + wiringLabel, loadPercent, speakerCount }
+
+    // SPL estimate per speaker (when sensitivity data is available)
+    const splValues = connectedNodes
+      .map(n => {
+        const d = n.data as SpeakerNodeData
+        if (d.model.sensitivity == null || d.model.impedance == null) return null
+        const pw = loZPowerPerSpeaker(channel, d.model.impedance, result.zLoad, wiring)
+        return estimateSPL(d.model.sensitivity, pw)
+      })
+      .filter((s): s is number => s !== null)
+    const splRange = splValues.length > 0
+      ? { min: Math.round(Math.min(...splValues)), max: Math.round(Math.max(...splValues)) }
+      : undefined
+
+    return { status: result.status, detail: (result.reason ?? `${speakerCount} speaker(s)`) + wiringLabel, loadPercent, speakerCount, splRange }
   } else {
     const tapWatts = connectedNodes.map(n => {
       const d = n.data as SpeakerNodeData
@@ -106,7 +129,21 @@ export function computeChannelStatus(
 
     const result = validateHiZZone(channel, tapWatts)
     const loadPercent = result.capacity > 0 ? Math.min((result.wLoad / result.capacity) * 100, 200) : 0
-    return { status: result.status, detail: result.reason ?? `${tapWatts.length} speaker(s)`, loadPercent, speakerCount: tapWatts.length }
+
+    // SPL estimate: 70V is constant-voltage — each speaker's SPL = sensitivity + 10log10(tapW)
+    const hiZSplValues = connectedNodes
+      .map((n, i) => {
+        const d = n.data as SpeakerNodeData
+        const pw = tapWatts[i]
+        if (d.model.sensitivity == null || pw == null) return null
+        return estimateSPL(d.model.sensitivity, pw)
+      })
+      .filter((s): s is number => s !== null)
+    const splRange = hiZSplValues.length > 0
+      ? { min: Math.round(Math.min(...hiZSplValues)), max: Math.round(Math.max(...hiZSplValues)) }
+      : undefined
+
+    return { status: result.status, detail: result.reason ?? `${tapWatts.length} speaker(s)`, loadPercent, speakerCount: tapWatts.length, splRange }
   }
 }
 
@@ -234,7 +271,7 @@ interface StoreState {
 
   clearCanvas: () => void
 
-  getChannelZoneStatus: (ampNodeId: string, channelId: string, outputMode: 'lo-z' | 'hi-z') => { status: ZoneStatus; detail: string; loadPercent: number; speakerCount: number }
+  getChannelZoneStatus: (ampNodeId: string, channelId: string, outputMode: 'lo-z' | 'hi-z') => ChannelStatus
   getOverallStatus: () => ZoneStatus
 
   // Derived catalog lookups

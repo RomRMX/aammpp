@@ -123,6 +123,9 @@ function SpeakerNodeInner({ id, data }: NodeProps) {
               </span>
             </>
           )}
+          {model.sensitivity !== undefined && (
+            <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{model.sensitivity} dB/W/m</span>
+          )}
         </div>
       )}
 
@@ -256,8 +259,17 @@ function SpeakerNodeInner({ id, data }: NodeProps) {
               {!model.specsUnavailable && model.impedance !== undefined && (
                 <InfoRow label="Impedance" value={`${model.impedance}Ω`} />
               )}
+              {!model.specsUnavailable && model.maxWatts !== undefined && (
+                <InfoRow label="Power handling" value={`${model.maxWatts}W`} />
+              )}
               {!model.specsUnavailable && model.tapOptions && model.tapOptions.length > 0 && (
                 <InfoRow label="70V Taps" value={model.tapOptions.map(w => `${w}W`).join(', ')} />
+              )}
+              {model.sensitivity !== undefined && (
+                <InfoRow label="Sensitivity" value={`${model.sensitivity} dB/W/m`} />
+              )}
+              {model.coverageAngle !== undefined && (
+                <InfoRow label="Coverage" value={`${model.coverageAngle}°`} />
               )}
             </tbody>
           </table>

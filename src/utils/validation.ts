@@ -42,6 +42,37 @@ export function isValidConnection(
   return true
 }
 
+// ── SPL estimation ────────────────────────────────────────────────────────────
+
+/**
+ * Estimate SPL at 1m given speaker sensitivity (dB/W/m) and drive power.
+ * Returns dB SPL (unweighted, free-field).
+ */
+export function estimateSPL(sensitivityDb: number, powerW: number): number {
+  if (powerW <= 0) return sensitivityDb
+  return sensitivityDb + 10 * Math.log10(powerW)
+}
+
+/**
+ * Estimate per-speaker power delivery for a lo-Z channel.
+ * Uses voltage-source model: V_rms² = maxWatts × ratedImpedance.
+ * - Parallel: each speaker sees full V_rms, P = V²/Z_spk
+ * - Series:   I = V_rms/Z_total, P_spk = I² × Z_spk = V²×Z_spk/Z_total²
+ */
+export function loZPowerPerSpeaker(
+  channel: AmpChannel,
+  speakerImpedance: number,
+  zTotal: number,
+  wiring: 'parallel' | 'series',
+): number {
+  const V2 = (channel.maxWatts ?? 0) * (channel.ratedImpedance ?? channel.minImpedance ?? 4)
+  if (V2 <= 0) return 0
+  if (wiring === 'series') {
+    return V2 * speakerImpedance / (zTotal * zTotal)
+  }
+  return V2 / speakerImpedance
+}
+
 // ── Zone (lo-Z) validation ────────────────────────────────────────────────────
 
 export type ZoneStatus = 'green' | 'amber' | 'red'
@@ -77,8 +108,10 @@ export function validateLoZZone(
   const zLoad = wiring === 'series'
     ? seriesImpedance(speakerImpedances)
     : parallelImpedance(speakerImpedances)
-  const minImp = channel.minImpedance ?? 4
+  const minImp    = channel.minImpedance ?? 4
+  const ratedImp  = channel.ratedImpedance ?? minImp
 
+  // Overload: below minimum impedance → RED
   if (zLoad < minImp) {
     return {
       status: 'red',
@@ -88,7 +121,7 @@ export function validateLoZZone(
     }
   }
 
-  // Amber if within 15% of minimum
+  // Near-minimum impedance (within 15%) → AMBER
   if (zLoad / minImp <= 1.15) {
     return {
       status: 'amber',
@@ -98,10 +131,28 @@ export function validateLoZZone(
     }
   }
 
+  // Series wiring: underpowering warning when load > 2× rated impedance
+  // (power delivery drops below 50% of rated — voltage-source model)
+  if (wiring === 'series' && zLoad > ratedImp * 2) {
+    const pct = Math.round((ratedImp / zLoad) * 100)
+    return {
+      status: 'amber',
+      zLoad,
+      speakerCount: speakerImpedances.length,
+      reason: `Series: ~${pct}% power delivery at ${zLoad}Ω`,
+    }
+  }
+
   return { status: 'green', zLoad, speakerCount: speakerImpedances.length }
 }
 
 // ── Zone (hi-Z) validation ────────────────────────────────────────────────────
+
+/** NEC/industry recommendation: max daisy-chained devices per 70V channel */
+const HIZ_MAX_SPEAKER_COUNT = 25
+
+/** Industry headroom rule: keep load below 80% of amp capacity */
+const HIZ_HEADROOM_THRESHOLD = 0.80
 
 export interface HiZZoneResult {
   status: ZoneStatus
@@ -113,43 +164,38 @@ export interface HiZZoneResult {
 }
 
 export function validateHiZZone(channel: AmpChannel, tapWatts: (number | null)[]): HiZZoneResult {
-  const capacity = channel.hiZWatts ?? 0
+  const capacity      = channel.hiZWatts ?? 0
   const hasPendingTap = tapWatts.some(w => w === null)
-
-  const wLoad = tapWatts.reduce<number>((acc, w) => acc + (w ?? 0), 0)
+  const speakerCount  = tapWatts.length
+  const wLoad         = tapWatts.reduce<number>((acc, w) => acc + (w ?? 0), 0)
 
   if (hasPendingTap) {
-    return {
-      status: 'amber',
-      wLoad,
-      capacity,
-      speakerCount: tapWatts.length,
-      hasPendingTap: true,
-      reason: 'Tap selection required',
-    }
+    return { status: 'amber', wLoad, capacity, speakerCount, hasPendingTap: true, reason: 'Tap selection required' }
   }
 
+  // Overload → RED
   if (wLoad > capacity) {
     return {
-      status: 'red',
-      wLoad,
-      capacity,
-      speakerCount: tapWatts.length,
-      hasPendingTap: false,
+      status: 'red', wLoad, capacity, speakerCount, hasPendingTap: false,
       reason: `${wLoad}W > ${capacity}W capacity`,
     }
   }
 
-  if (capacity > 0 && wLoad > capacity * 0.85) {
+  // Exceeds 80% headroom threshold → AMBER
+  if (capacity > 0 && wLoad > capacity * HIZ_HEADROOM_THRESHOLD) {
     return {
-      status: 'amber',
-      wLoad,
-      capacity,
-      speakerCount: tapWatts.length,
-      hasPendingTap: false,
-      reason: `${wLoad}W > 85% of ${capacity}W`,
+      status: 'amber', wLoad, capacity, speakerCount, hasPendingTap: false,
+      reason: `${wLoad}W > 80% of ${capacity}W (industry headroom rule)`,
     }
   }
 
-  return { status: 'green', wLoad, capacity, speakerCount: tapWatts.length, hasPendingTap: false }
+  // Exceeds NEC daisy-chain device limit → AMBER
+  if (speakerCount > HIZ_MAX_SPEAKER_COUNT) {
+    return {
+      status: 'amber', wLoad, capacity, speakerCount, hasPendingTap: false,
+      reason: `${speakerCount} devices exceeds NEC 25-unit daisy-chain limit`,
+    }
+  }
+
+  return { status: 'green', wLoad, capacity, speakerCount, hasPendingTap: false }
 }

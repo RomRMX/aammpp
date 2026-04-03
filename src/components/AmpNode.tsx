@@ -164,7 +164,7 @@ function AmpNodeInner({ id, data }: NodeProps) {
 
         {/* Right column: output channels with load bars */}
         <div style={{ flex: 1 }}>
-          {channelStatuses.map(({ ch, status, detail, loadPercent, speakerCount }, idx) => {
+          {channelStatuses.map(({ ch, status, detail, loadPercent, speakerCount, splRange }, idx) => {
             const handleId = `${ch.id}-out`
             const watts    = ch.outputMode === 'hi-z' ? ch.hiZWatts : ch.maxWatts
             const barColor = loadPercent > 100 ? STATUS_COLOR.red
@@ -241,6 +241,15 @@ function AmpNodeInner({ id, data }: NodeProps) {
                     />
                   )}
                 </div>
+
+                {/* SPL estimate — shown when speaker sensitivity data is available */}
+                {splRange && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 22px 3px 8px' }}>
+                    <span style={{ fontSize: 9, color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                      ~{splRange.min === splRange.max ? splRange.min : `${splRange.min}–${splRange.max}`} dB SPL
+                    </span>
+                  </div>
+                )}
 
                 {/* Series / Parallel toggle — lo-z only, when ≥2 speakers connected */}
                 {ch.outputMode === 'lo-z' && speakerCount >= 2 && (

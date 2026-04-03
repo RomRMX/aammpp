@@ -28,9 +28,12 @@ export interface SpeakerModel {
   name: string
   collection: string
   speakerType: 'lo-z' | 'hi-z' | 'tappable'
-  impedance?: number      // Ω nominal
-  tapOptions?: number[]   // 70V watt taps (descending)
+  impedance?: number        // Ω nominal
+  tapOptions?: number[]     // 70V watt taps (descending)
   specsUnavailable?: boolean
+  sensitivity?: number      // dB SPL @ 1W/1m (for SPL estimation)
+  maxWatts?: number         // Continuous power handling (W)
+  coverageAngle?: number    // Nominal dispersion angle (degrees, for future coverage calc)
 }
 
 export interface SourceModel {
