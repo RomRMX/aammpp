@@ -254,7 +254,7 @@ function SubsTab({ query, onDragStart }: { query: string; onDragStart: SidebarPr
 
 function AmpsTab({ query, onDragStart }: { query: string; onDragStart: SidebarProps['onDragStart'] }) {
   const grouped = useMemo(() => groupBySeriesAmps(CATALOG_AMPS, query), [query])
-  const SERIES_ORDER = ['Pro', 'Foundation']
+  const SERIES_ORDER = ['Pro', 'Foundation', 'Sub Amps']
   const series = SERIES_ORDER.filter(s => grouped[s]).concat(Object.keys(grouped).filter(s => !SERIES_ORDER.includes(s)).sort())
   if (series.length === 0) return <EmptyState />
   return (

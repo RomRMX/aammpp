@@ -197,9 +197,8 @@ export const AMPS: AmpModel[] = [
   {
     "modelId": "SubA150",
     "name": "SubA150",
-    "series": "Foundation",
-    "subtitle": "1× Lo-Z",
-    "subOnly": true,
+    "series": "Sub Amps",
+    "subtitle": "1× Lo-Z · 150W",
     "dealer": 420,
     "msrp": 903,
     "channels": [
@@ -207,18 +206,17 @@ export const AMPS: AmpModel[] = [
         "id": "loz1",
         "label": "Sub Lo-Z",
         "outputMode": "lo-z",
-        "maxWatts": 80,
-        "ratedImpedance": 8,
-        "minImpedance": 2
+        "maxWatts": 150,
+        "ratedImpedance": 4,
+        "minImpedance": 4
       }
     ]
   },
   {
     "modelId": "SubA500",
     "name": "SubA500",
-    "series": "Foundation",
-    "subtitle": "1× Lo-Z",
-    "subOnly": true,
+    "series": "Sub Amps",
+    "subtitle": "1× Lo-Z · 500W",
     "dealer": 807,
     "msrp": 1742,
     "channels": [
@@ -226,9 +224,9 @@ export const AMPS: AmpModel[] = [
         "id": "loz1",
         "label": "Sub Lo-Z",
         "outputMode": "lo-z",
-        "maxWatts": 250,
-        "ratedImpedance": 8,
-        "minImpedance": 2
+        "maxWatts": 500,
+        "ratedImpedance": 4,
+        "minImpedance": 4
       }
     ]
   },
