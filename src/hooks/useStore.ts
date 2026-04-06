@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { applyNodeChanges, applyEdgeChanges } from '@xyflow/react'
 import type { Node, Edge, NodeChange, EdgeChange, Connection } from '@xyflow/react'
 import { AMPS, AMPS_SORTED, SPEAKERS, SUBS, MUSIC_SOURCE, type AmpModel, type SpeakerModel } from '../data/catalog'
-import { validateLoZZone, validateHiZZone, estimateSPL, loZPowerPerSpeaker, type ZoneStatus } from '../utils/validation'
+import { validateLoZZone, validateHiZZone, estimateSPL, loZPowerPerSpeaker, suggestWiring, type ZoneStatus } from '../utils/validation'
 import { ZONE_COLORS } from '../constants/theme'
 
 // ── Node data types ──────────────────────────────────────────────────────────
@@ -13,6 +13,8 @@ export interface AmpNodeData {
   model: AmpModel
   /** Per-channel lo-Z wiring mode (default: 'parallel') */
   channelWiring?: Record<string, 'parallel' | 'series'>
+  /** Per-channel BTL mode — true means this master channel is bridged with its btlPairId slave */
+  channelBtl?: Record<string, boolean>
   [key: string]: unknown
 }
 
@@ -58,6 +60,8 @@ export interface ChannelStatus {
   speakerCount: number
   /** Estimated SPL range at 1m in dB, when speaker sensitivity data is available */
   splRange?: { min: number; max: number }
+  /** Suggested alternative wiring when current mode is overloaded or severely underpowered */
+  wiringHint?: string
 }
 
 export function computeChannelStatus(
@@ -89,11 +93,31 @@ export function computeChannelStatus(
     const channel = ampData?.model.channels.find(c => c.id === channelId)
     if (!channel) return { status: 'green', detail: 'No channel', loadPercent: 0, speakerCount: 0 }
 
+    // BTL slave: another channel on this amp has btlPairId pointing here and is BTL-enabled
+    const btlMaster = ampData?.model.channels.find(
+      c => c.btlPairId === channelId && (ampData?.channelBtl?.[c.id] ?? false)
+    )
+    if (btlMaster) {
+      return { status: 'green', detail: 'BTL bridge', loadPercent: 0, speakerCount: 0 }
+    }
+
+    // BTL master: this channel has BTL enabled — use BTL specs instead of SE specs
+    const isBtlActive = !!(channel.btlPairId && (ampData?.channelBtl?.[channelId] ?? false))
+    const effectiveChannel = isBtlActive
+      ? {
+          ...channel,
+          maxWatts: channel.btlWatts ?? channel.maxWatts,
+          ratedImpedance: channel.btlRatedImpedance ?? channel.ratedImpedance,
+          minImpedance: channel.btlMinImpedance ?? channel.minImpedance,
+        }
+      : channel
+
     const wiring = ampData?.channelWiring?.[channelId] ?? 'parallel'
-    const result = validateLoZZone(channel, impedances, wiring)
+    const result = validateLoZZone(effectiveChannel, impedances, wiring)
     const speakerCount = impedances.length
-    const minImp = channel.minImpedance ?? 4
+    const minImp = effectiveChannel.minImpedance ?? 4
     const loadPercent = speakerCount === 0 ? 0 : Math.min((minImp / result.zLoad) * 100, 200)
+    const btlLabel = isBtlActive ? ' (BTL)' : ''
     const wiringLabel = speakerCount >= 2 ? ` (${wiring})` : ''
 
     // SPL estimate per speaker (when sensitivity data is available)
@@ -101,7 +125,7 @@ export function computeChannelStatus(
       .map(n => {
         const d = n.data as SpeakerNodeData
         if (d.model.sensitivity == null || d.model.impedance == null) return null
-        const pw = loZPowerPerSpeaker(channel, d.model.impedance, result.zLoad, wiring)
+        const pw = loZPowerPerSpeaker(effectiveChannel, d.model.impedance, result.zLoad, wiring)
         return estimateSPL(d.model.sensitivity, pw)
       })
       .filter((s): s is number => s !== null)
@@ -109,7 +133,8 @@ export function computeChannelStatus(
       ? { min: Math.round(Math.min(...splValues)), max: Math.round(Math.max(...splValues)) }
       : undefined
 
-    return { status: result.status, detail: (result.reason ?? `${speakerCount} speaker(s)`) + wiringLabel, loadPercent, speakerCount, splRange }
+    const wiringHint = suggestWiring(effectiveChannel, impedances, wiring) ?? undefined
+    return { status: result.status, detail: (result.reason ?? `${speakerCount} speaker(s)`) + btlLabel + wiringLabel, loadPercent, speakerCount, splRange, wiringHint }
   } else {
     const tapWatts = connectedNodes.map(n => {
       const d = n.data as SpeakerNodeData
@@ -205,8 +230,17 @@ function findOrCreateChannel(
   // Search existing amps for a free matching channel
   for (const ampNode of newNodes.filter(n => n.data.kind === 'amp')) {
     const ampData = ampNode.data as AmpNodeData
+    const channelBtl = ampData.channelBtl ?? {}
     for (const ch of ampData.model.channels) {
       if (ch.outputMode !== channelType) continue
+      // Skip BTL slave channels (bridged, not independently connectable)
+      const isBtlSlave = ampData.model.channels.some(
+        c => c.btlPairId === ch.id && channelBtl[c.id]
+      )
+      if (isBtlSlave) continue
+      // Skip BTL master channels that are actively bridged (dedicated to single BTL load)
+      const isBtlMasterActive = !!(ch.btlPairId && channelBtl[ch.id])
+      if (isBtlMasterActive) continue
       const handle = `${ch.id}-out`
       if (!newEdges.some(e => e.source === ampNode.id && e.sourceHandle === handle)) {
         return { ampId: ampNode.id, channelHandle: handle }
@@ -267,6 +301,7 @@ interface StoreState {
 
   setTap: (nodeId: string, mode: 'lo-z' | '70v', watts?: number) => void
   setChannelWiring: (ampNodeId: string, channelId: string, mode: 'parallel' | 'series') => void
+  setChannelBtl: (ampNodeId: string, channelId: string, enabled: boolean) => void
   setZoneLabel: (zoneId: string, label: string) => void
 
   clearCanvas: () => void
@@ -373,6 +408,22 @@ export const useStore = create<StoreState>()(
               data: {
                 ...d,
                 channelWiring: { ...d.channelWiring, [channelId]: mode },
+              },
+            }
+          }),
+        }))
+      },
+
+      setChannelBtl: (ampNodeId, channelId, enabled) => {
+        set(state => ({
+          nodes: state.nodes.map(n => {
+            if (n.id !== ampNodeId) return n
+            const d = n.data as AmpNodeData
+            return {
+              ...n,
+              data: {
+                ...d,
+                channelBtl: { ...d.channelBtl, [channelId]: enabled },
               },
             }
           }),

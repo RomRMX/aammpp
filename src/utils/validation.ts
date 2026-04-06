@@ -146,6 +146,64 @@ export function validateLoZZone(
   return { status: 'green', zLoad, speakerCount: speakerImpedances.length }
 }
 
+// ── Wiring suggestion ────────────────────────────────────────────────────────
+
+/**
+ * When the current wiring is overloaded or severely underpowered, suggest a
+ * better alternative. Tries the opposite simple mode first, then series-parallel
+ * groupings (e.g. 2S/2P) for even speaker counts with identical impedances.
+ * Returns a short hint string or null if current wiring is acceptable.
+ */
+export function suggestWiring(
+  channel: AmpChannel,
+  impedances: number[],
+  currentWiring: 'parallel' | 'series',
+): string | null {
+  if (impedances.length < 2) return null
+
+  const minImp    = channel.minImpedance ?? 4
+  const ratedImp  = channel.ratedImpedance ?? minImp
+  const N         = impedances.length
+
+  const currentZ = currentWiring === 'parallel'
+    ? parallelImpedance(impedances)
+    : seriesImpedance(impedances)
+
+  const isOverloaded   = currentZ < minImp
+  const isUnderpowered = currentWiring === 'series' && currentZ > ratedImp * 2
+  if (!isOverloaded && !isUnderpowered) return null
+
+  // Try the other simple mode
+  const altWiring = currentWiring === 'parallel' ? 'series' : 'parallel'
+  const altZ = altWiring === 'parallel'
+    ? parallelImpedance(impedances)
+    : seriesImpedance(impedances)
+  if (altZ >= minImp && altZ <= ratedImp * 4) {
+    return `Try ${altWiring}: ${altZ % 1 === 0 ? altZ : altZ.toFixed(1)}Ω`
+  }
+
+  // Try series-parallel groupings (kS groups of groupSize speakers, then k-way parallel)
+  // Only reliable when all speakers share the same impedance
+  const allSame = impedances.every(z => z === impedances[0])
+  if (allSame) {
+    const Z = impedances[0]
+    const candidates: { label: string; z: number }[] = []
+    for (let k = 2; k < N; k++) {
+      if (N % k !== 0) continue
+      const groupSize = N / k
+      const z = (groupSize * Z) / k
+      if (z >= minImp) candidates.push({ label: `${groupSize}S/${k}P`, z })
+    }
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => Math.abs(a.z - ratedImp) - Math.abs(b.z - ratedImp))
+      const { label, z } = candidates[0]
+      return `Try ${label}: ${z % 1 === 0 ? z : z.toFixed(1)}Ω`
+    }
+  }
+
+  return null
+}
+
 // ── Zone (hi-Z) validation ────────────────────────────────────────────────────
 
 /** NEC/industry recommendation: max daisy-chained devices per 70V channel */

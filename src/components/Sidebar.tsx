@@ -465,10 +465,11 @@ export function Sidebar({ onDragStart }: SidebarProps) {
               padding: '6px 8px',
               cursor: 'grab',
               borderBottom: '1px solid var(--border)',
-              background: 'var(--surface)',
+              borderLeft: '3px solid var(--blue)',
+              background: 'rgba(74,143,212,0.10)',
             }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(74,143,212,0.18)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(74,143,212,0.10)' }}
           >
             <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>
               {CATALOG_SOURCE.name}

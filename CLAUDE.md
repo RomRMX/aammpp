@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-**Amp Connect** is a browser-based signal path design tool for Origin Acoustics ProA amplifiers and speakers. Users drag devices from a sidebar onto a canvas, wire ports together, and export a Bill of Materials.
+**Amp Connect** is a browser-based signal path design tool for Origin Acoustics ProA amplifiers and speakers. Users drag devices from a sidebar onto a canvas, wire channels together, and export a Bill of Materials.
 
-The active codebase is a React + Vite app deployed to Vercel. A legacy standalone HTML version lives in `legacy/` and `AMP BIBLE/` for reference only — do not edit those.
+The active codebase is a React + Vite + TypeScript app built on **ReactFlow** (`@xyflow/react`), deployed to Vercel.
 
 ## Commands
 
@@ -23,81 +23,99 @@ npm run lint     # ESLint (max-warnings 0 — lint must be clean)
 
 ```
 src/
-  App.jsx              # Root component — layout, BOM modal, zoom controls, drag-drop orchestration
-  main.jsx             # React DOM entry point
-  index.css            # Tailwind base + CSS custom properties (design tokens)
-  data/catalog.js      # ALL_MODELS catalog + buildRows() layout helper
-  utils/signal.js      # WIRE_COLORS, TYPE_COMPAT, checkCompat()
-  hooks/useStore.js    # Zustand store — all runtime state and actions
+  App.tsx               # Root: ReactFlow canvas, sidebar, BOM modal, drag-drop, zone drawing
+  main.tsx              # React DOM entry point
+  index.css             # Tailwind base + design tokens
+  data/catalog.ts       # AmpModel/SpeakerModel/SourceModel types + full product catalog
+  utils/validation.ts   # Impedance/power validation, SPL estimation, channel status logic
+  hooks/useStore.ts     # Zustand store — all runtime state, actions, catalog exports
+  constants/theme.ts    # Color tokens and status styling maps
   components/
-    DeviceCard.jsx     # Individual device on the canvas (ports, drag-to-move, delete)
-    Wire.jsx           # SVG bezier wire between two ports (click to delete)
+    AmpNode.tsx         # Amplifier canvas node (channels, load bars, wiring mode toggle)
+    SpeakerNode.tsx     # Speaker canvas node (impedance/tap selection, mode toggle)
+    ZoneNode.tsx        # Zone container node (group label, auto-wire trigger)
+    Sidebar.tsx         # Left panel — catalog browser, search, drag-to-canvas
+    BomModal.tsx        # Bill of materials export dialog
+    DeletableEdge.tsx   # Custom ReactFlow edge with delete button on hover
+    SourceNode.tsx      # Fixed audio source node
 ```
 
 ### State (Zustand — `useStore`)
 
-All runtime state lives in a single Zustand store:
+All runtime state is in a single persisted Zustand store (`localStorage`). Key slices:
 
-- `devices` — plain object map of `{ id, model, x, y, n }`. `model` is a key into `ALL_MODELS`.
-- `wires` — plain object map of `{ id, from, to, type, connId }`. `from`/`to` are port keys like `"dev3::ch2"`.
-- `canvas` — `{ scale, ox, oy }` — CSS transform applied to the workspace `div`.
-- `ui` — ephemeral interaction state (active port during wiring, panning, toasts, context menu).
+- `nodes` / `edges` — ReactFlow graph state (nodes carry domain data in `node.data`)
+- `_nodeCounter` — monotonically increasing ID seed, rehydrated on load
+- Catalog slices exported from store: `CATALOG_AMPS`, `CATALOG_SUB_AMPS`, `CATALOG_SPEAKERS`, `CATALOG_SUBS`, `CATALOG_SOURCE`
 
-Key actions: `addDevice`, `updateDevicePos`, `deleteDevice`, `addWire`, `deleteWire`, `getPortInfo`, `setCanvasScale`, `setCanvasOffset`, `clearCanvas`, `resetView`.
+Key actions: `addAmp`, `addSpeaker`, `addSource`, `autoDropSpeaker`, `deleteNode`, `addEdge`, `deleteEdge`, `clearCanvas`.
 
-### Port keys
+### Node types and data shapes
 
-Ports are addressed as `"<deviceId>::<portId>"` (e.g. `"dev1::ain1"`). `getPortInfo(portKey)` resolves the port to canvas coordinates `{ x, y, side, type, devId }` by re-computing layout from `buildRows()` on demand — there is no stored port position state.
+| Node type | `node.data` key fields |
+|-----------|------------------------|
+| `AmpNode` | `model: AmpModel`, `channelWiring: Record<string, 'parallel'\|'series'>` |
+| `SpeakerNode` | `model: SpeakerModel`, `selectedMode?: 'loz'\|'hiz'`, `selectedTap?: number` |
+| `ZoneNode` | `label: string` |
+| `SourceNode` | `model: SourceModel` |
 
-### Wiring flow
+Handles follow a convention: `amp-ch{n}-out`, `spk-in-loz`, `spk-in-hiz` — string matching is used in validation and auto-wiring.
 
-1. `mousedown` on a port dot → `setUi({ activePort: portKey })` + dashed animated wire follows cursor (`ActiveWire` in `App.jsx`)
-2. `mouseup` on a compatible port → `addWire(from, to)` → `checkCompat()` validates direction and type → wire is stored or a toast error is shown
-3. Click a rendered `Wire` → `deleteWire(id)`
+### Catalog data model
 
-### Canvas transform
+`src/data/catalog.ts` defines:
 
-The canvas `div` uses `transform: translate(ox, oy) scale(scale)` with `origin-top-left`. Device positions are stored in canvas-space, so `getPortInfo` returns canvas-space coordinates directly. Mouse events in `App.jsx` convert screen coords to canvas-space via `(clientX - rect.left - canvas.ox) / canvas.scale`.
-
-## Data: catalog
-
-`src/data/catalog.js` exports `ALL_MODELS` (keyed by model ID) and `buildRows(ports)`.
-
-**Model shape:**
-```js
-'ModelId': {
-  name: 'Display Name',
-  subtitle: 'Power · Channels · Form Factor',
-  badge: 'BADGE',
-  isAmp: true,           // false for passive speakers/subs
-  cat: 'Category Name',  // sidebar grouping: 'Pro Series', 'Composer Series', 'Subwoofer', etc.
-  dealer: 1234,
-  msrp: 2345,
-  ports: [ ... ]
-}
+```ts
+AmpModel   { id, name, series, channels: AmpChannel[], msrp, dealer, badge }
+AmpChannel { id, outputMode: 'lo-z'|'hi-z', ratedPower, minImpedance, ... }
+SpeakerModel { id, name, collection, speakerType: 'lo-z'|'hi-z'|'tappable',
+               impedance, sensitivity, maxWatts, coverageAngle, ... }
 ```
 
-**Port shape:** `{ id, label, side: 'left'|'right', type: 'analog'|'speaker'|'digital'|'network'|'power'|'gpio'|'utility' }`
+`src/data/catalog.ts` **is the source of truth** — edit it directly to add or update products. Find the right array (`AMPS`, `SPEAKERS`, or `SUBS`), copy an existing entry, and fill in the fields. TypeScript will flag missing required fields.
 
-**Helpers in catalog.js:** `commonInputPorts()` (standard amp inputs), `proAOutPorts(loZCount, hiZCount)` (amp outputs), `mkSpkr()`, `mkSub()` (speaker/sub factories).
+### Validation engine (`utils/validation.ts`)
 
-`buildRows(ports)` pairs left/right ports into `{ left, right }` rows for card layout — used in `DeviceCard` and `getPortInfo`.
+This is where most domain complexity lives.
 
-## Signal compatibility
+**Lo-Z channels**: computes parallel/series equivalent impedance from connected speakers per `channelWiring` setting. Status:
+- RED: load impedance < channel `minImpedance` (overload)
+- AMBER: within 15% of min, or series impedance > 2× rated
+- GREEN: safe
 
-`checkCompat(p1, p2)` in `src/utils/signal.js` enforces:
-- Same device → rejected
-- Same side (two inputs or two outputs) → rejected
-- Type mismatch per `TYPE_COMPAT` → rejected
-- Power (`AC Mains`) ports → always rejected (cannot be patched)
+**Hi-Z channels**: sums watt taps. RED > rated power, AMBER > 80% or > 25 devices (NEC limit), GREEN otherwise.
+
+**SPL estimation**: voltage-source model using `ratedPower`, `minImpedance`, and speaker `sensitivity`.
+
+**`pickBestAmpModel(requirements)`**: selects smallest amp with enough channels and appropriate headroom. Prefers ProA125 series for compactness.
+
+**BOM export** is blocked when any channel is RED.
+
+### Drag-drop and auto-wiring
+
+1. Sidebar items set `dataTransfer` with model ID + type on `dragStart`
+2. `App.tsx` `onDrop` converts screen → flow coords via `screenToFlowPosition`
+3. `autoDropSpeaker` finds a free matching amp channel or creates a new amp, then wires source → amp → speaker automatically
+
+### Zone drawing
+
+Custom drag-select rectangle drawn in screen space over the ReactFlow canvas. Converts selection rect to flow coords, gathers enclosed speaker nodes, creates a `ZoneNode` with auto-wiring. Minimum 50×50px to prevent accidental zones.
+
+### Wiring modes (lo-Z channels only)
+
+Visible only when ≥2 speakers are connected to a lo-Z channel. Toggle between `parallel` (lower impedance, more power per speaker) and `series` (higher impedance, safer for borderline loads). Stored in `node.data.channelWiring`.
+
+### Tappable speakers
+
+Have dual modes: lo-z (8Ω) or hi-z (70V). Mode must be selected before the correct handle appears and a connection can be made. 70V mode requires a watt tap selection that feeds into hi-Z validation.
 
 ## Reference data
 
-`AMP BIBLE/` — PDFs, datasheets, and CSV product snapshots for Origin PRO amps. Use these to verify or update device specs in `catalog.js`. `AVIATOR_Consolidated_Updated.csv` and `AVIATOR_XV1.xlsx` in the root are the primary product data sources.
+`AMP BIBLE/` — PDFs and CSV snapshots for Origin PRO amps. Use these to verify specs when editing `catalog.ts`.
 
 ## Deployment
 
-Deployed via Vercel. `vercel.json` rewrites all routes to `index.html` for SPA routing. `.vercel/project.json` holds the linked project ID.
+Deployed via Vercel. `vercel.json` rewrites all routes to `index.html` for SPA routing.
 
 ## Skill routing
 

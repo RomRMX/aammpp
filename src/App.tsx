@@ -80,7 +80,7 @@ function buildPortMetaResolver(nodes: AppNode[]) {
 function ZoomLabel() {
   const { zoom } = useViewport()
   return (
-    <Panel position="bottom-left" style={{ margin: 0, padding: 0, pointerEvents: 'none' }}>
+    <Panel position="bottom-right" style={{ margin: 0, padding: 0, pointerEvents: 'none' }}>
       <div
         style={{
           background: 'var(--surface)',

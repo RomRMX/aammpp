@@ -2058,7 +2058,8 @@ export const SUBS: SpeakerModel[] = [
     "impedance": 4,
     "tapOptions": [300, 150, 75],
     "sensitivity": 94,
-    "maxWatts": 600
+    "maxWatts": 600,
+    "coverageAngle": 360
   },
   {
     "modelId": "SUBD10",
