@@ -9,6 +9,11 @@ export interface AmpChannel {
   ratedImpedance?: number  // Ω
   minImpedance?: number    // Ω
   hiZWatts?: number        // 70V channel capacity (W)
+  // BTL (bridge-tied load) fields — master channel only
+  btlWatts?: number           // W in BTL mode
+  btlRatedImpedance?: number  // Ω rated in BTL mode
+  btlMinImpedance?: number    // Ω minimum load in BTL mode
+  btlPairId?: string          // ID of slave channel bridged with this master
 }
 
 export interface AmpModel {
@@ -2058,7 +2063,8 @@ export const SUBS: SpeakerModel[] = [
     "impedance": 4,
     "tapOptions": [300, 150, 75],
     "sensitivity": 94,
-    "maxWatts": 600
+    "maxWatts": 600,
+    "coverageAngle": 360
   },
   {
     "modelId": "SUBD10",

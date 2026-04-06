@@ -6,10 +6,11 @@ import { fmtPrice } from '../utils/display'
 import { STATUS_COLOR, STATUS_LABEL } from '../constants/theme'
 
 function AmpNodeInner({ id, data }: NodeProps) {
-  const { model, channelWiring } = data as AmpNodeData
+  const { model, channelWiring, channelBtl } = data as AmpNodeData
   const { deleteElements } = useReactFlow()
   const getChannelZoneStatus = useStore(s => s.getChannelZoneStatus)
   const setChannelWiring = useStore(s => s.setChannelWiring)
+  const setChannelBtl = useStore(s => s.setChannelBtl)
   const [showInfo, setShowInfo] = useState(false)
 
   const handleDelete = useCallback(() => {
@@ -164,16 +165,24 @@ function AmpNodeInner({ id, data }: NodeProps) {
 
         {/* Right column: output channels with load bars */}
         <div style={{ flex: 1 }}>
-          {channelStatuses.map(({ ch, status, detail, loadPercent, speakerCount, splRange }, idx) => {
+          {channelStatuses.map(({ ch, status, detail, loadPercent, speakerCount, splRange, wiringHint }, idx) => {
             const handleId = `${ch.id}-out`
-            const watts    = ch.outputMode === 'hi-z' ? ch.hiZWatts : ch.maxWatts
+            const isBtlMaster = !!ch.btlPairId
+            const isBtlActive = isBtlMaster && !!(channelBtl?.[ch.id])
+            // Is this channel the slave of an active BTL pair?
+            const btlMasterCh = model.channels.find(c => c.btlPairId === ch.id && !!(channelBtl?.[c.id]))
+            const isBtlSlave = !!btlMasterCh
+
+            const displayWatts = isBtlActive
+              ? ch.btlWatts
+              : ch.outputMode === 'hi-z' ? ch.hiZWatts : ch.maxWatts
             const barColor = loadPercent > 100 ? STATUS_COLOR.red
                            : loadPercent > 85  ? STATUS_COLOR.amber
                            : STATUS_COLOR.green
             const wiring = channelWiring?.[ch.id] ?? 'parallel'
 
             return (
-              <div key={ch.id}>
+              <div key={ch.id} style={{ opacity: isBtlSlave ? 0.45 : 1 }}>
                 <div
                   style={{
                     position: 'relative',
@@ -190,28 +199,37 @@ function AmpNodeInner({ id, data }: NodeProps) {
                       display: 'inline-block',
                       width: 6, height: 6,
                       borderRadius: '50%',
-                      background: STATUS_COLOR[status],
+                      background: isBtlSlave ? 'var(--text-dim)' : STATUS_COLOR[status],
                       flexShrink: 0,
                     }}
-                    title={detail}
+                    title={isBtlSlave ? `Bridged with ${btlMasterCh?.label}` : detail}
                   />
-                  {watts !== undefined && (
-                    <span style={{ fontSize: 10, color: 'var(--text-dim)', flexShrink: 0 }}>
-                      {watts}W
+                  {isBtlSlave ? (
+                    <span style={{ fontSize: 10, color: 'var(--text-dim)', fontStyle: 'italic', flexShrink: 0 }}>
+                      BTL Bridge
                     </span>
+                  ) : (
+                    <>
+                      {displayWatts !== undefined && (
+                        <span style={{ fontSize: 10, color: isBtlActive ? 'var(--amber)' : 'var(--text-dim)', flexShrink: 0, fontWeight: isBtlActive ? 600 : 400 }}>
+                          {displayWatts}W{isBtlActive ? ' BTL' : ''}
+                        </span>
+                      )}
+                      <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>
+                        {ch.label}
+                      </span>
+                    </>
                   )}
-                  <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>
-                    {ch.label}
-                  </span>
                   <Handle
                     type="source"
                     position={Position.Right}
                     id={handleId}
+                    isConnectable={!isBtlSlave}
                     style={{
                       right: -5,
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      background: ch.outputMode === 'hi-z' ? 'var(--amber)' : 'var(--blue)',
+                      background: isBtlSlave ? 'var(--border)' : ch.outputMode === 'hi-z' ? 'var(--amber)' : 'var(--blue)',
                       border: '2px solid var(--surface)',
                       width: 10,
                       height: 10,
@@ -220,30 +238,25 @@ function AmpNodeInner({ id, data }: NodeProps) {
                   />
                 </div>
 
-                {/* Load bar */}
-                <div
-                  style={{
-                    height: 3,
-                    background: 'var(--bg)',
-                    marginBottom: 2,
-                    marginRight: 22,
-                  }}
-                >
-                  {loadPercent > 0 && (
-                    <div
-                      style={{
-                        height: '100%',
-                        width: `${Math.min(loadPercent, 100)}%`,
-                        background: barColor,
-                        borderRadius: 2,
-                        transition: 'width 0.2s ease, background 0.2s ease',
-                      }}
-                    />
-                  )}
-                </div>
+                {/* Load bar — hidden for BTL slave */}
+                {!isBtlSlave && (
+                  <div style={{ height: 3, background: 'var(--bg)', marginBottom: 2, marginRight: 22 }}>
+                    {loadPercent > 0 && (
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${Math.min(loadPercent, 100)}%`,
+                          background: barColor,
+                          borderRadius: 2,
+                          transition: 'width 0.2s ease, background 0.2s ease',
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
 
-                {/* SPL estimate — shown when speaker sensitivity data is available */}
-                {splRange && (
+                {/* SPL estimate */}
+                {!isBtlSlave && splRange && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 22px 3px 8px' }}>
                     <span style={{ fontSize: 9, color: 'var(--text-dim)', fontStyle: 'italic' }}>
                       ~{splRange.min === splRange.max ? splRange.min : `${splRange.min}–${splRange.max}`} dB SPL
@@ -251,8 +264,43 @@ function AmpNodeInner({ id, data }: NodeProps) {
                   </div>
                 )}
 
-                {/* Series / Parallel toggle — lo-z only, when ≥2 speakers connected */}
-                {ch.outputMode === 'lo-z' && speakerCount >= 2 && (
+                {/* BTL toggle — lo-z master channels only */}
+                {isBtlMaster && (
+                  <div
+                    className="nodrag"
+                    style={{ display: 'flex', gap: 3, padding: '2px 22px 4px 8px', justifyContent: 'flex-end' }}
+                  >
+                    <button
+                      className="nodrag"
+                      onClick={() => setChannelBtl(id, ch.id, !isBtlActive)}
+                      style={{
+                        padding: '1px 6px',
+                        fontSize: 9,
+                        borderRadius: 2,
+                        border: `1px solid ${isBtlActive ? 'var(--amber)' : 'var(--border)'}`,
+                        background: isBtlActive ? 'rgba(255,160,50,0.15)' : 'var(--surface-2)',
+                        color: isBtlActive ? 'var(--amber)' : 'var(--text-dim)',
+                        cursor: 'pointer',
+                        fontWeight: isBtlActive ? 600 : 400,
+                      }}
+                      title={isBtlActive ? 'Disable BTL (bridge-tied load)' : 'Enable BTL (bridge-tied load)'}
+                    >
+                      ⊃ BTL
+                    </button>
+                  </div>
+                )}
+
+                {/* Wiring suggestion hint */}
+                {wiringHint && !isBtlActive && !isBtlSlave && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 22px 2px 8px' }}>
+                    <span style={{ fontSize: 9, color: 'var(--amber)', fontStyle: 'italic' }}>
+                      ⚠ {wiringHint}
+                    </span>
+                  </div>
+                )}
+
+                {/* Series / Parallel toggle — lo-z only, when ≥2 speakers connected, not in BTL mode */}
+                {ch.outputMode === 'lo-z' && speakerCount >= 2 && !isBtlActive && !isBtlSlave && (
                   <div
                     className="nodrag"
                     style={{ display: 'flex', gap: 3, padding: '2px 22px 4px 8px', justifyContent: 'flex-end' }}
@@ -328,6 +376,7 @@ function AmpNodeInner({ id, data }: NodeProps) {
                   {ch.ratedImpedance !== undefined && ` @ ${ch.ratedImpedance}Ω`}
                   {ch.minImpedance !== undefined && ` (min ${ch.minImpedance}Ω)`}
                   {ch.hiZWatts !== undefined && ` · 70V: ${ch.hiZWatts}W`}
+                  {ch.btlWatts !== undefined && ` · BTL: ${ch.btlWatts}W @ ${ch.btlRatedImpedance}Ω`}
                 </div>
               </div>
             ))}
