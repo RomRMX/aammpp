@@ -210,6 +210,71 @@ function pickBestAmpModel(channelType: 'lo-z' | 'hi-z', speakersNeeded: number):
   return candidates.sort(sorter)[0].model
 }
 
+// ── Amp tier recommendations ──────────────────────────────────────────────────
+
+export interface AmpTier {
+  tier: 'headroom' | 'bestFit' | 'economical'
+  model: AmpModel
+  matchingChannels: number
+  spareChannels: number
+  wattsPerChannel?: number  // lo-Z: maxWatts of first matching channel
+  hiZCapacity?: number      // hi-Z: hiZWatts of first matching channel
+}
+
+/**
+ * Returns up to 3 amp recommendations for the given channel type and speaker count:
+ * - headroom: most channels / highest watt rating (expansion-focused)
+ * - bestFit:  current smart pick (ProA125 preference, safe load)
+ * - economical: fewest channels that cover the load, lowest price
+ */
+export function computeAmpTiers(
+  channelType: 'lo-z' | 'hi-z',
+  speakersNeeded: number
+): AmpTier[] {
+  const candidates = AMPS
+    .map(a => ({
+      model: a,
+      matchingChannels: a.channels.filter(c => c.outputMode === channelType).length,
+      firstChannel: a.channels.find(c => c.outputMode === channelType),
+    }))
+    .filter(c => c.matchingChannels >= speakersNeeded)
+
+  if (candidates.length === 0) return []
+
+  // Economical: fewest channels, then lowest dealer price
+  const minCh = Math.min(...candidates.map(c => c.matchingChannels))
+  const economical = candidates
+    .filter(c => c.matchingChannels === minCh)
+    .sort((a, b) => (a.model.dealer ?? Infinity) - (b.model.dealer ?? Infinity))[0]
+
+  // Best Fit: current algorithm result
+  const bestFitModel = pickBestAmpModel(channelType, speakersNeeded)
+  const bestFit = candidates.find(c => c.model.modelId === bestFitModel?.modelId) ?? economical
+
+  // Headroom: most matching channels, tiebreak on watt output
+  const headroom = candidates.slice().sort((a, b) => {
+    if (b.matchingChannels !== a.matchingChannels) return b.matchingChannels - a.matchingChannels
+    const aW = channelType === 'lo-z' ? (a.firstChannel?.maxWatts ?? 0) : (a.firstChannel?.hiZWatts ?? 0)
+    const bW = channelType === 'lo-z' ? (b.firstChannel?.maxWatts ?? 0) : (b.firstChannel?.hiZWatts ?? 0)
+    return bW - aW
+  })[0]
+
+  const toTier = (c: typeof candidates[0], tier: AmpTier['tier']): AmpTier => ({
+    tier,
+    model: c.model,
+    matchingChannels: c.matchingChannels,
+    spareChannels: c.matchingChannels - speakersNeeded,
+    wattsPerChannel: channelType === 'lo-z' ? c.firstChannel?.maxWatts : undefined,
+    hiZCapacity: channelType === 'hi-z' ? c.firstChannel?.hiZWatts : undefined,
+  })
+
+  return [
+    toTier(headroom, 'headroom'),
+    toTier(bestFit, 'bestFit'),
+    toTier(economical, 'economical'),
+  ]
+}
+
 // ── Shared wiring helpers ────────────────────────────────────────────────────
 
 function mkEdgeId(): string {
@@ -219,16 +284,23 @@ function mkEdgeId(): string {
 /**
  * Finds the first existing amp with a free channel of the given type, or creates
  * a new amp (+ source if none exists) at `ampPos`. Mutates `newNodes`/`newEdges`.
+ * When `preferredModelId` is set, only considers/creates amps of that model.
  */
 function findOrCreateChannel(
   channelType: 'lo-z' | 'hi-z',
   speakersNeeded: number,
   ampPos: { x: number; y: number },
   newNodes: AppNode[],
-  newEdges: AppEdge[]
+  newEdges: AppEdge[],
+  preferredModelId?: string
 ): { ampId: string; channelHandle: string } | null {
   // Search existing amps for a free matching channel
-  for (const ampNode of newNodes.filter(n => n.data.kind === 'amp')) {
+  const ampPool = newNodes.filter(n => {
+    if (n.data.kind !== 'amp') return false
+    if (preferredModelId) return (n.data as AmpNodeData).model.modelId === preferredModelId
+    return true
+  })
+  for (const ampNode of ampPool) {
     const ampData = ampNode.data as AmpNodeData
     const channelBtl = ampData.channelBtl ?? {}
     for (const ch of ampData.model.channels) {
@@ -249,7 +321,9 @@ function findOrCreateChannel(
   }
 
   // No free channel — spin up a new amp
-  const ampModel = pickBestAmpModel(channelType, speakersNeeded)
+  const ampModel = preferredModelId
+    ? (AMPS.find(a => a.modelId === preferredModelId) ?? pickBestAmpModel(channelType, speakersNeeded))
+    : pickBestAmpModel(channelType, speakersNeeded)
   if (!ampModel) return null
 
   const ampId = `amp-${++_nodeCounter}`
@@ -274,6 +348,13 @@ function findOrCreateChannel(
       source: srcId,
       target: ampId,
       sourceHandle: 'analog-l',
+      targetHandle: 'analog-in',
+    })
+    newEdges.push({
+      id: mkEdgeId(),
+      source: srcId,
+      target: ampId,
+      sourceHandle: 'analog-r',
       targetHandle: 'analog-in',
     })
   }
@@ -316,7 +397,7 @@ interface StoreState {
   autoDropSpeaker: (modelId: string, isSub: boolean, pos: { x: number; y: number }) => void
   autoDropSource: (pos: { x: number; y: number }) => void
   addZone: (label: string, position: { x: number; y: number }, width: number, height: number) => void
-  groupIntoZone: (selectedNodeIds: string[]) => void
+  groupIntoZone: (selectedNodeIds: string[], ampChoices?: { loZ?: string; hiZ?: string }) => void
 }
 
 export const useStore = create<StoreState>()(
@@ -529,6 +610,13 @@ export const useStore = create<StoreState>()(
             sourceHandle: 'analog-l',
             targetHandle: 'analog-in',
           })
+          newEdges.push({
+            id: mkEdgeId(),
+            source: srcId,
+            target: targetAmp.id,
+            sourceHandle: 'analog-r',
+            targetHandle: 'analog-in',
+          })
         }
 
         set({ nodes: newNodes, edges: newEdges })
@@ -549,7 +637,7 @@ export const useStore = create<StoreState>()(
         set(s => ({ nodes: [zoneNode, ...s.nodes] }))
       },
 
-      groupIntoZone: (selectedNodeIds) => {
+      groupIntoZone: (selectedNodeIds, ampChoices) => {
         const { nodes, edges } = get()
 
         const selectedSpeakers = nodes.filter(
@@ -587,6 +675,7 @@ export const useStore = create<StoreState>()(
 
         const wireGroup = (speakers: AppNode[], channelType: 'lo-z' | 'hi-z') => {
           if (speakers.length === 0) return
+          const preferredModelId = channelType === 'lo-z' ? ampChoices?.loZ : ampChoices?.hiZ
           const targetHandleId = channelType === 'hi-z' ? 'spk-in-hiz' : 'spk-in-loz'
           const avgY = speakers.reduce((s, n) => s + n.position.y, 0) / speakers.length
 
@@ -597,7 +686,8 @@ export const useStore = create<StoreState>()(
               remaining,
               { x: minX - 380, y: avgY - 20 },
               newNodes,
-              newEdges
+              newEdges,
+              preferredModelId
             )
             if (!found) continue
             newEdges.push({
@@ -610,8 +700,18 @@ export const useStore = create<StoreState>()(
           }
         }
 
-        const loZ = unconnectedSpeakers.filter(n => (n.data as SpeakerNodeData).model.speakerType !== 'hi-z')
-        const hiZ = unconnectedSpeakers.filter(n => (n.data as SpeakerNodeData).model.speakerType === 'hi-z')
+        const loZ = unconnectedSpeakers.filter(n => {
+          const d = n.data as SpeakerNodeData
+          if (d.model.speakerType === 'hi-z') return false
+          if (d.model.speakerType === 'tappable') return d.selectedMode !== '70v'
+          return true
+        })
+        const hiZ = unconnectedSpeakers.filter(n => {
+          const d = n.data as SpeakerNodeData
+          if (d.model.speakerType === 'hi-z') return true
+          if (d.model.speakerType === 'tappable') return d.selectedMode === '70v'
+          return false
+        })
         wireGroup(loZ, 'lo-z')
         wireGroup(hiZ, 'hi-z')
 

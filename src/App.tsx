@@ -23,6 +23,7 @@ import { ZoneNode } from './components/ZoneNode'
 import { DeletableEdge } from './components/DeletableEdge'
 import { Sidebar } from './components/Sidebar'
 import { BomModal } from './components/BomModal'
+import { AmpPickerModal } from './components/AmpPickerModal'
 
 // ── Node + edge type registries ───────────────────────────────────────────────
 
@@ -197,6 +198,7 @@ function AppInner() {
   const [selectModeActive, setSelectModeActive]       = useState(false)
   const [zonePreview, setZonePreview]                 = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
   const [selectedSpeakerIds, setSelectedSpeakerIds]  = useState<string[]>([])
+  const [pendingZone, setPendingZone]                 = useState<{ selectedIds: string[] } | null>(null)
 
   const dragKindRef    = useRef<'amp' | 'speaker' | 'sub' | 'source'>('amp')
   const dragModelRef   = useRef<string>('')
@@ -356,7 +358,7 @@ function AppInner() {
           {selectedSpeakerIds.length > 0 && (
             <button
               onClick={() => {
-                groupIntoZone(selectedSpeakerIds)
+                setPendingZone({ selectedIds: selectedSpeakerIds })
                 setSelectedSpeakerIds([])
                 setSelectModeActive(false)
               }}
@@ -372,7 +374,7 @@ function AppInner() {
               }}
               title="Create zone around selected speakers and auto-wire"
             >
-              ⬚ Zone {selectedSpeakerIds.length} selected
+              ⬚ Establish Zone
             </button>
           )}
 
@@ -395,26 +397,6 @@ function AppInner() {
             title={selectModeActive ? 'Cancel selection mode' : 'Drag-select speakers to group into a zone'}
           >
             {selectModeActive ? '✕ Selecting' : '◻ Select'}
-          </button>
-
-          {/* Zone draw tool toggle */}
-          <button
-            onClick={() => {
-              setZoneModeActive(z => !z)
-              setSelectModeActive(false)
-            }}
-            style={{
-              padding: '4px 12px',
-              background: zoneModeActive ? 'rgba(74,143,212,0.2)' : 'none',
-              border: `1px solid ${zoneModeActive ? 'var(--blue)' : 'var(--border)'}`,
-              color: zoneModeActive ? 'var(--blue)' : 'var(--text-secondary)',
-              borderRadius: 3,
-              cursor: 'pointer',
-              fontSize: 12,
-            }}
-            title={zoneModeActive ? 'Cancel zone drawing' : 'Draw a zone frame'}
-          >
-            {zoneModeActive ? '✕ Cancel Zone' : '⬚ Zone'}
           </button>
 
           <button
@@ -514,6 +496,22 @@ function AppInner() {
       </div>
 
       {showBom && <BomModal onClose={() => setShowBom(false)} />}
+      {pendingZone && (
+        <AmpPickerModal
+          selectedSpeakerIds={pendingZone.selectedIds}
+          onConfirm={(loZModelId, hiZModelId) => {
+            groupIntoZone(pendingZone.selectedIds, { loZ: loZModelId, hiZ: hiZModelId })
+            setPendingZone(null)
+            // Clear ReactFlow selection highlight on all nodes
+            onNodesChange(
+              nodes
+                .filter(n => n.selected)
+                .map(n => ({ type: 'select' as const, id: n.id, selected: false }))
+            )
+          }}
+          onCancel={() => setPendingZone(null)}
+        />
+      )}
     </div>
   )
 }

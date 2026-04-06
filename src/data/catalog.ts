@@ -9,6 +9,11 @@ export interface AmpChannel {
   ratedImpedance?: number  // Ω
   minImpedance?: number    // Ω
   hiZWatts?: number        // 70V channel capacity (W)
+  // BTL (bridge-tied load) fields — master channel only
+  btlWatts?: number           // W in BTL mode
+  btlRatedImpedance?: number  // Ω rated in BTL mode
+  btlMinImpedance?: number    // Ω minimum load in BTL mode
+  btlPairId?: string          // ID of slave channel bridged with this master
 }
 
 export interface AmpModel {
