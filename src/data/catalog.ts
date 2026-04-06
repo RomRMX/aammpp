@@ -124,7 +124,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 4,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz2",
+        "hiZWatts": 125
       },
       {
         "id": "loz2",
@@ -140,7 +142,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 4,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz4",
+        "hiZWatts": 125
       },
       {
         "id": "loz4",
@@ -156,7 +160,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 4,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz6",
+        "hiZWatts": 125
       },
       {
         "id": "loz6",
@@ -172,7 +178,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 4,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz8",
+        "hiZWatts": 125
       },
       {
         "id": "loz8",
@@ -181,30 +189,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 60,
         "ratedImpedance": 4,
         "minImpedance": 4
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
-      },
-      {
-        "id": "hiz3",
-        "label": "Ch 3 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
-      },
-      {
-        "id": "hiz4",
-        "label": "Ch 4 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
       }
     ]
   },
@@ -260,7 +244,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 250,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz2",
+        "hiZWatts": 1000
       },
       {
         "id": "loz2",
@@ -269,12 +255,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 250,
         "ratedImpedance": 8,
         "minImpedance": 2
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1000
       }
     ]
   },
@@ -292,7 +272,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 250,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz2",
+        "hiZWatts": 1000
       },
       {
         "id": "loz2",
@@ -308,7 +290,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 250,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz4",
+        "hiZWatts": 1000
       },
       {
         "id": "loz4",
@@ -317,18 +301,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 250,
         "ratedImpedance": 8,
         "minImpedance": 2
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1000
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1000
       }
     ]
   },
@@ -346,7 +318,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 250,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz2",
+        "hiZWatts": 1000
       },
       {
         "id": "loz2",
@@ -362,7 +336,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 250,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz4",
+        "hiZWatts": 1000
       },
       {
         "id": "loz4",
@@ -378,7 +354,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 250,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz6",
+        "hiZWatts": 1000
       },
       {
         "id": "loz6",
@@ -394,7 +372,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 250,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz8",
+        "hiZWatts": 1000
       },
       {
         "id": "loz8",
@@ -403,30 +383,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 250,
         "ratedImpedance": 8,
         "minImpedance": 2
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1000
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1000
-      },
-      {
-        "id": "hiz3",
-        "label": "Ch 3 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1000
-      },
-      {
-        "id": "hiz4",
-        "label": "Ch 4 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1000
       }
     ]
   },
@@ -444,7 +400,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 400,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz2",
+        "hiZWatts": 1200
       },
       {
         "id": "loz2",
@@ -453,12 +411,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 400,
         "ratedImpedance": 8,
         "minImpedance": 2
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1200
       }
     ]
   },
@@ -476,7 +428,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 400,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz2",
+        "hiZWatts": 1200
       },
       {
         "id": "loz2",
@@ -492,7 +446,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 400,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz4",
+        "hiZWatts": 1200
       },
       {
         "id": "loz4",
@@ -501,18 +457,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 400,
         "ratedImpedance": 8,
         "minImpedance": 2
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1200
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1200
       }
     ]
   },
@@ -530,7 +474,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 400,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz2",
+        "hiZWatts": 1200
       },
       {
         "id": "loz2",
@@ -546,7 +492,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 400,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz4",
+        "hiZWatts": 1200
       },
       {
         "id": "loz4",
@@ -562,7 +510,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 400,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz6",
+        "hiZWatts": 1200
       },
       {
         "id": "loz6",
@@ -578,7 +528,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 400,
         "ratedImpedance": 8,
-        "minImpedance": 2
+        "minImpedance": 2,
+        "btlPairId": "loz8",
+        "hiZWatts": 1200
       },
       {
         "id": "loz8",
@@ -587,30 +539,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 400,
         "ratedImpedance": 8,
         "minImpedance": 2
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1200
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1200
-      },
-      {
-        "id": "hiz3",
-        "label": "Ch 3 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1200
-      },
-      {
-        "id": "hiz4",
-        "label": "Ch 4 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 1200
       }
     ]
   },
@@ -628,7 +556,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz2",
+        "hiZWatts": 125
       },
       {
         "id": "loz2",
@@ -637,12 +567,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 60,
         "ratedImpedance": 8,
         "minImpedance": 4
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
       }
     ]
   },
@@ -660,7 +584,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz2",
+        "hiZWatts": 125
       },
       {
         "id": "loz2",
@@ -676,7 +602,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz4",
+        "hiZWatts": 125
       },
       {
         "id": "loz4",
@@ -685,18 +613,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 60,
         "ratedImpedance": 8,
         "minImpedance": 4
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
       }
     ]
   },
@@ -714,7 +630,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz2",
+        "hiZWatts": 125
       },
       {
         "id": "loz2",
@@ -730,7 +648,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz4",
+        "hiZWatts": 125
       },
       {
         "id": "loz4",
@@ -746,7 +666,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz6",
+        "hiZWatts": 125
       },
       {
         "id": "loz6",
@@ -762,7 +684,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 60,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz8",
+        "hiZWatts": 125
       },
       {
         "id": "loz8",
@@ -771,30 +695,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 60,
         "ratedImpedance": 8,
         "minImpedance": 4
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
-      },
-      {
-        "id": "hiz3",
-        "label": "Ch 3 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
-      },
-      {
-        "id": "hiz4",
-        "label": "Ch 4 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 125
       }
     ]
   },
@@ -812,7 +712,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 125,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz2",
+        "hiZWatts": 250
       },
       {
         "id": "loz2",
@@ -821,12 +723,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 125,
         "ratedImpedance": 8,
         "minImpedance": 4
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 250
       }
     ]
   },
@@ -844,7 +740,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 125,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz2",
+        "hiZWatts": 250
       },
       {
         "id": "loz2",
@@ -860,7 +758,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 125,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz4",
+        "hiZWatts": 250
       },
       {
         "id": "loz4",
@@ -869,18 +769,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 125,
         "ratedImpedance": 8,
         "minImpedance": 4
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 250
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 250
       }
     ]
   },
@@ -898,7 +786,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 125,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz2",
+        "hiZWatts": 250
       },
       {
         "id": "loz2",
@@ -914,7 +804,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 125,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz4",
+        "hiZWatts": 250
       },
       {
         "id": "loz4",
@@ -930,7 +822,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 125,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz6",
+        "hiZWatts": 250
       },
       {
         "id": "loz6",
@@ -946,7 +840,9 @@ export const AMPS: AmpModel[] = [
         "outputMode": "lo-z",
         "maxWatts": 125,
         "ratedImpedance": 8,
-        "minImpedance": 4
+        "minImpedance": 4,
+        "btlPairId": "loz8",
+        "hiZWatts": 250
       },
       {
         "id": "loz8",
@@ -955,30 +851,6 @@ export const AMPS: AmpModel[] = [
         "maxWatts": 125,
         "ratedImpedance": 8,
         "minImpedance": 4
-      },
-      {
-        "id": "hiz1",
-        "label": "Ch 1 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 250
-      },
-      {
-        "id": "hiz2",
-        "label": "Ch 2 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 250
-      },
-      {
-        "id": "hiz3",
-        "label": "Ch 3 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 250
-      },
-      {
-        "id": "hiz4",
-        "label": "Ch 4 Hi-Z",
-        "outputMode": "hi-z",
-        "hiZWatts": 250
       }
     ]
   }

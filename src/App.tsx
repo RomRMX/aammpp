@@ -46,16 +46,23 @@ function buildPortMetaResolver(nodes: AppNode[]) {
 
     const d = node.data
     if (d.kind === 'amp') {
-      const model = (d as AmpNodeData).model
+      const ampData = d as AmpNodeData
+      const model = ampData.model
       if (handleId === 'analog-in') {
         return { deviceId: nodeId, portId: handleId, signalType: 'analog', direction: 'input' }
       }
       const ch = model.channels.find(c => `${c.id}-out` === handleId)
       if (ch) {
+        // hi-Z when the BTL pair is operating in 70V mode
+        const isHiZBtl = !!(
+          ch.btlPairId && ch.hiZWatts &&
+          ampData.channelBtl?.[ch.id] &&
+          ampData.channelHiZ?.[ch.id]
+        )
         return {
           deviceId: nodeId,
           portId: handleId,
-          signalType: ch.outputMode === 'hi-z' ? 'speaker-hiz' : 'speaker-loz',
+          signalType: isHiZBtl ? 'speaker-hiz' : 'speaker-loz',
           direction: 'output',
         }
       }
@@ -136,11 +143,11 @@ function ContextPanel() {
       icon = '✓'
       const ampDesc = ampNodes.map(n => {
         const m = (n.data as AmpNodeData).model
-        const loZ = m.channels.filter(c => c.outputMode === 'lo-z')
-        const hiZ = m.channels.filter(c => c.outputMode === 'hi-z')
+        const loZ  = m.channels.filter(c => c.outputMode === 'lo-z' && !c.btlPairId)
+        const hiZPairs = m.channels.filter(c => c.outputMode === 'lo-z' && c.btlPairId && c.hiZWatts)
         const parts: string[] = []
         if (loZ.length) parts.push(`${loZ.length}× lo-z ${loZ[0].maxWatts ?? '?'}W`)
-        if (hiZ.length) parts.push(`${hiZ.length}× hi-z ${hiZ[0].hiZWatts ?? '?'}W`)
+        if (hiZPairs.length) parts.push(`${hiZPairs.length}× hi-z ${hiZPairs[0].hiZWatts ?? '?'}W`)
         const why = m.modelId.startsWith('ProA125') ? 'compact fit'
           : m.modelId.startsWith('ProA250') ? 'mid-power fit'
           : m.modelId.startsWith('ProA1000') ? 'high-power fit'

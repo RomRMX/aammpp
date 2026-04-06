@@ -15,6 +15,12 @@ export interface AmpNodeData {
   channelWiring?: Record<string, 'parallel' | 'series'>
   /** Per-channel BTL mode — true means this master channel is bridged with its btlPairId slave */
   channelBtl?: Record<string, boolean>
+  /**
+   * Per-channel hi-Z (70V) mode — only meaningful when channelBtl is also true.
+   * When both are true the BTL pair drives a 70V line; when only btl is true it
+   * drives a bridged lo-Z sub load.
+   */
+  channelHiZ?: Record<string, boolean>
   [key: string]: unknown
 }
 
@@ -101,14 +107,43 @@ export function computeChannelStatus(
       return { status: 'green', detail: 'BTL bridge', loadPercent: 0, speakerCount: 0 }
     }
 
-    // BTL master: this channel has BTL enabled — use BTL specs instead of SE specs
     const isBtlActive = !!(channel.btlPairId && (ampData?.channelBtl?.[channelId] ?? false))
+    const isHiZBtl    = isBtlActive && !!(channel.hiZWatts && (ampData?.channelHiZ?.[channelId] ?? false))
+
+    // BTL + Hi-Z mode: treat as a hi-Z channel using the BTL-generated 70V rail
+    if (isHiZBtl) {
+      const hiZChannel = { ...channel, hiZWatts: channel.hiZWatts }
+      const tapWatts = connectedNodes.map(n => {
+        const d = n.data as SpeakerNodeData
+        if (d.model.speakerType === 'tappable') return d.selectedTap ?? null
+        if (d.model.speakerType === 'hi-z')    return d.model.tapOptions?.[0] ?? null
+        return null
+      })
+      const result = validateHiZZone(hiZChannel, tapWatts)
+      const loadPercent = (channel.hiZWatts ?? 0) > 0
+        ? Math.min((result.wLoad / channel.hiZWatts!) * 100, 200)
+        : 0
+      const hiZSplValues = connectedNodes
+        .map((n, i) => {
+          const d = n.data as SpeakerNodeData
+          const pw = tapWatts[i]
+          if (d.model.sensitivity == null || pw == null) return null
+          return estimateSPL(d.model.sensitivity, pw)
+        })
+        .filter((s): s is number => s !== null)
+      const splRange = hiZSplValues.length > 0
+        ? { min: Math.round(Math.min(...hiZSplValues)), max: Math.round(Math.max(...hiZSplValues)) }
+        : undefined
+      return { status: result.status, detail: result.reason ?? `${tapWatts.length} speaker(s) (Hi-Z BTL)`, loadPercent, speakerCount: tapWatts.length, splRange }
+    }
+
+    // BTL master (lo-Z sub mode): use BTL specs instead of SE specs
     const effectiveChannel = isBtlActive
       ? {
           ...channel,
-          maxWatts: channel.btlWatts ?? channel.maxWatts,
+          maxWatts:       channel.btlWatts       ?? channel.maxWatts,
           ratedImpedance: channel.btlRatedImpedance ?? channel.ratedImpedance,
-          minImpedance: channel.btlMinImpedance ?? channel.minImpedance,
+          minImpedance:   channel.btlMinImpedance   ?? channel.minImpedance,
         }
       : channel
 
@@ -180,17 +215,26 @@ export function computeChannelStatus(
  * for that type is ≥ speakersNeeded AND that provides load headroom
  * (channels should land GREEN, i.e. ≤85% load, not right at the rated limit).
  */
+/** Returns the number of usable channels of the given type for an amp model. */
+function countChannels(a: AmpModel, channelType: 'lo-z' | 'hi-z'): number {
+  if (channelType === 'hi-z') {
+    // hi-Z is achieved via BTL pairs — count lo-Z master channels that have hiZWatts
+    return a.channels.filter(c => c.outputMode === 'lo-z' && c.btlPairId && c.hiZWatts).length
+  }
+  return a.channels.filter(c => c.outputMode === 'lo-z').length
+}
+
 function pickBestAmpModel(channelType: 'lo-z' | 'hi-z', speakersNeeded: number): AmpModel | null {
   const candidates = AMPS
-    .filter(a => a.channels.some(c => c.outputMode === channelType))
+    .filter(a => countChannels(a, channelType) > 0)
     .map(a => {
-      const matchingChannels = a.channels.filter(c => c.outputMode === channelType)
+      const matchCount = countChannels(a, channelType)
       const minImpedance = channelType === 'lo-z'
-        ? Math.min(...matchingChannels.map(c => c.minImpedance ?? 4))
+        ? Math.min(...a.channels.filter(c => c.outputMode === 'lo-z').map(c => c.minImpedance ?? 4))
         : null
       return {
         model: a,
-        matchCount: matchingChannels.length,
+        matchCount,
         isProA125: a.modelId.startsWith('ProA125'),
         hasHeadroom: channelType === 'hi-z' ? true : (minImpedance ?? 4) <= 3,
       }
@@ -232,11 +276,13 @@ export function computeAmpTiers(
   speakersNeeded: number
 ): AmpTier[] {
   const candidates = AMPS
-    .map(a => ({
-      model: a,
-      matchingChannels: a.channels.filter(c => c.outputMode === channelType).length,
-      firstChannel: a.channels.find(c => c.outputMode === channelType),
-    }))
+    .map(a => {
+      const matchingChannels = countChannels(a, channelType)
+      const firstChannel = channelType === 'hi-z'
+        ? a.channels.find(c => c.outputMode === 'lo-z' && c.btlPairId && c.hiZWatts)
+        : a.channels.find(c => c.outputMode === 'lo-z')
+      return { model: a, matchingChannels, firstChannel }
+    })
     .filter(c => c.matchingChannels >= speakersNeeded)
 
   if (candidates.length === 0) return []
@@ -300,22 +346,51 @@ function findOrCreateChannel(
     if (preferredModelId) return (n.data as AmpNodeData).model.modelId === preferredModelId
     return true
   })
+
   for (const ampNode of ampPool) {
     const ampData = ampNode.data as AmpNodeData
     const channelBtl = ampData.channelBtl ?? {}
-    for (const ch of ampData.model.channels) {
-      if (ch.outputMode !== channelType) continue
-      // Skip BTL slave channels (bridged, not independently connectable)
-      const isBtlSlave = ampData.model.channels.some(
-        c => c.btlPairId === ch.id && channelBtl[c.id]
-      )
-      if (isBtlSlave) continue
-      // Skip BTL master channels that are actively bridged (dedicated to single BTL load)
-      const isBtlMasterActive = !!(ch.btlPairId && channelBtl[ch.id])
-      if (isBtlMasterActive) continue
-      const handle = `${ch.id}-out`
-      if (!newEdges.some(e => e.source === ampNode.id && e.sourceHandle === handle)) {
-        return { ampId: ampNode.id, channelHandle: handle }
+
+    if (channelType === 'hi-z') {
+      // hi-Z uses BTL pairs — find a lo-Z master with hiZWatts whose pair is free
+      for (const ch of ampData.model.channels) {
+        if (ch.outputMode !== 'lo-z' || !ch.btlPairId || !ch.hiZWatts) continue
+        // Skip if already in BTL mode (used)
+        if (channelBtl[ch.id]) continue
+        const masterHandle = `${ch.id}-out`
+        const slaveHandle  = `${ch.btlPairId}-out`
+        if (newEdges.some(e => e.source === ampNode.id && e.sourceHandle === masterHandle)) continue
+        if (newEdges.some(e => e.source === ampNode.id && e.sourceHandle === slaveHandle)) continue
+        // Activate BTL + hi-Z on this channel in newNodes
+        const nodeIdx = newNodes.findIndex(n => n.id === ampNode.id)
+        if (nodeIdx >= 0) {
+          const nd = newNodes[nodeIdx].data as AmpNodeData
+          newNodes[nodeIdx] = {
+            ...newNodes[nodeIdx],
+            data: {
+              ...nd,
+              channelBtl: { ...nd.channelBtl, [ch.id]: true },
+              channelHiZ: { ...(nd.channelHiZ ?? {}), [ch.id]: true },
+            },
+          }
+        }
+        return { ampId: ampNode.id, channelHandle: masterHandle }
+      }
+    } else {
+      for (const ch of ampData.model.channels) {
+        if (ch.outputMode !== 'lo-z') continue
+        // Skip BTL slave channels
+        const isBtlSlave = ampData.model.channels.some(
+          c => c.btlPairId === ch.id && channelBtl[c.id]
+        )
+        if (isBtlSlave) continue
+        // Skip BTL master channels that are actively bridged
+        const isBtlMasterActive = !!(ch.btlPairId && channelBtl[ch.id])
+        if (isBtlMasterActive) continue
+        const handle = `${ch.id}-out`
+        if (!newEdges.some(e => e.source === ampNode.id && e.sourceHandle === handle)) {
+          return { ampId: ampNode.id, channelHandle: handle }
+        }
       }
     }
   }
@@ -327,11 +402,27 @@ function findOrCreateChannel(
   if (!ampModel) return null
 
   const ampId = `amp-${++_nodeCounter}`
+  // For hi-Z: pre-activate BTL+hiZ on the first eligible master channel
+  const initialBtl: Record<string, boolean> = {}
+  const initialHiZ: Record<string, boolean> = {}
+  if (channelType === 'hi-z') {
+    const firstHiZMaster = ampModel.channels.find(
+      c => c.outputMode === 'lo-z' && c.btlPairId && c.hiZWatts
+    )
+    if (firstHiZMaster) {
+      initialBtl[firstHiZMaster.id] = true
+      initialHiZ[firstHiZMaster.id] = true
+    }
+  }
   newNodes.push({
     id: ampId,
     type: 'ampNode',
     position: ampPos,
-    data: { kind: 'amp', model: ampModel } satisfies AmpNodeData,
+    data: {
+      kind: 'amp',
+      model: ampModel,
+      ...(channelType === 'hi-z' ? { channelBtl: initialBtl, channelHiZ: initialHiZ } : {}),
+    } satisfies AmpNodeData,
   })
 
   // Create source node if none exists on canvas
@@ -359,7 +450,9 @@ function findOrCreateChannel(
     })
   }
 
-  const matchingCh = ampModel.channels.find(c => c.outputMode === channelType)
+  const matchingCh = channelType === 'hi-z'
+    ? ampModel.channels.find(c => c.outputMode === 'lo-z' && c.btlPairId && c.hiZWatts)
+    : ampModel.channels.find(c => c.outputMode === 'lo-z')
   if (!matchingCh) return null
   return { ampId, channelHandle: `${matchingCh.id}-out` }
 }
@@ -383,6 +476,7 @@ interface StoreState {
   setTap: (nodeId: string, mode: 'lo-z' | '70v', watts?: number) => void
   setChannelWiring: (ampNodeId: string, channelId: string, mode: 'parallel' | 'series') => void
   setChannelBtl: (ampNodeId: string, channelId: string, enabled: boolean) => void
+  setChannelHiZ: (ampNodeId: string, channelId: string, enabled: boolean) => void
   setZoneLabel: (zoneId: string, label: string) => void
 
   clearCanvas: () => void
@@ -500,11 +594,30 @@ export const useStore = create<StoreState>()(
           nodes: state.nodes.map(n => {
             if (n.id !== ampNodeId) return n
             const d = n.data as AmpNodeData
+            // When disabling BTL, also clear hi-Z mode for that channel
+            const channelHiZ = enabled ? d.channelHiZ : { ...(d.channelHiZ ?? {}), [channelId]: false }
             return {
               ...n,
               data: {
                 ...d,
                 channelBtl: { ...d.channelBtl, [channelId]: enabled },
+                channelHiZ,
+              },
+            }
+          }),
+        }))
+      },
+
+      setChannelHiZ: (ampNodeId, channelId, enabled) => {
+        set(state => ({
+          nodes: state.nodes.map(n => {
+            if (n.id !== ampNodeId) return n
+            const d = n.data as AmpNodeData
+            return {
+              ...n,
+              data: {
+                ...d,
+                channelHiZ: { ...(d.channelHiZ ?? {}), [channelId]: enabled },
               },
             }
           }),

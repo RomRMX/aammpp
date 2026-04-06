@@ -5,12 +5,15 @@ import { useStore, type AmpNodeData } from '../hooks/useStore'
 import { fmtPrice } from '../utils/display'
 import { STATUS_COLOR, STATUS_LABEL } from '../constants/theme'
 
+type ChannelMode = 'se' | 'btl-sub' | 'hi-z'
+
 function AmpNodeInner({ id, data }: NodeProps) {
-  const { model, channelWiring, channelBtl } = data as AmpNodeData
+  const { model, channelWiring, channelBtl, channelHiZ } = data as AmpNodeData
   const { deleteElements } = useReactFlow()
   const getChannelZoneStatus = useStore(s => s.getChannelZoneStatus)
   const setChannelWiring = useStore(s => s.setChannelWiring)
   const setChannelBtl = useStore(s => s.setChannelBtl)
+  const setChannelHiZ = useStore(s => s.setChannelHiZ)
   const [showInfo, setShowInfo] = useState(false)
 
   const handleDelete = useCallback(() => {
@@ -169,17 +172,30 @@ function AmpNodeInner({ id, data }: NodeProps) {
             const handleId = `${ch.id}-out`
             const isBtlMaster = !!ch.btlPairId
             const isBtlActive = isBtlMaster && !!(channelBtl?.[ch.id])
+            const isHiZMode   = isBtlActive && !!(ch.hiZWatts && channelHiZ?.[ch.id])
+            const currentMode: ChannelMode = isHiZMode ? 'hi-z' : isBtlActive ? 'btl-sub' : 'se'
+
             // Is this channel the slave of an active BTL pair?
             const btlMasterCh = model.channels.find(c => c.btlPairId === ch.id && !!(channelBtl?.[c.id]))
             const isBtlSlave = !!btlMasterCh
 
-            const displayWatts = isBtlActive
-              ? ch.btlWatts
-              : ch.outputMode === 'hi-z' ? ch.hiZWatts : ch.maxWatts
+            const displayWatts = isHiZMode
+              ? ch.hiZWatts
+              : isBtlActive
+                ? (ch.btlWatts ?? ch.maxWatts)
+                : ch.maxWatts
             const barColor = loadPercent > 100 ? STATUS_COLOR.red
                            : loadPercent > 85  ? STATUS_COLOR.amber
                            : STATUS_COLOR.green
             const wiring = channelWiring?.[ch.id] ?? 'parallel'
+
+            const handleColor = isBtlSlave
+              ? 'var(--border)'
+              : isHiZMode
+                ? 'var(--amber)'
+                : isBtlActive
+                  ? 'var(--amber)'
+                  : 'var(--blue)'
 
             return (
               <div key={ch.id} style={{ opacity: isBtlSlave ? 0.45 : 1 }}>
@@ -211,8 +227,8 @@ function AmpNodeInner({ id, data }: NodeProps) {
                   ) : (
                     <>
                       {displayWatts !== undefined && (
-                        <span style={{ fontSize: 10, color: isBtlActive ? 'var(--amber)' : 'var(--text-dim)', flexShrink: 0, fontWeight: isBtlActive ? 600 : 400 }}>
-                          {displayWatts}W{isBtlActive ? ' BTL' : ''}
+                        <span style={{ fontSize: 10, color: (isBtlActive || isHiZMode) ? 'var(--amber)' : 'var(--text-dim)', flexShrink: 0, fontWeight: (isBtlActive || isHiZMode) ? 600 : 400 }}>
+                          {displayWatts}W{isHiZMode ? ' 70V' : isBtlActive ? ' BTL' : ''}
                         </span>
                       )}
                       <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>
@@ -229,7 +245,7 @@ function AmpNodeInner({ id, data }: NodeProps) {
                       right: -5,
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      background: isBtlSlave ? 'var(--border)' : ch.outputMode === 'hi-z' ? 'var(--amber)' : 'var(--blue)',
+                      background: handleColor,
                       border: '2px solid var(--surface)',
                       width: 10,
                       height: 10,
@@ -264,29 +280,51 @@ function AmpNodeInner({ id, data }: NodeProps) {
                   </div>
                 )}
 
-                {/* BTL toggle — lo-z master channels only */}
-                {isBtlMaster && (
+                {/* 3-way channel mode selector — BTL master channels only, hidden for slaves */}
+                {isBtlMaster && !isBtlSlave && (
                   <div
                     className="nodrag"
                     style={{ display: 'flex', gap: 3, padding: '2px 22px 4px 8px', justifyContent: 'flex-end' }}
                   >
-                    <button
-                      className="nodrag"
-                      onClick={() => setChannelBtl(id, ch.id, !isBtlActive)}
-                      style={{
-                        padding: '1px 6px',
-                        fontSize: 9,
-                        borderRadius: 2,
-                        border: `1px solid ${isBtlActive ? 'var(--amber)' : 'var(--border)'}`,
-                        background: isBtlActive ? 'rgba(255,160,50,0.15)' : 'var(--surface-2)',
-                        color: isBtlActive ? 'var(--amber)' : 'var(--text-dim)',
-                        cursor: 'pointer',
-                        fontWeight: isBtlActive ? 600 : 400,
-                      }}
-                      title={isBtlActive ? 'Disable BTL (bridge-tied load)' : 'Enable BTL (bridge-tied load)'}
-                    >
-                      ⊃ BTL
-                    </button>
+                    {([
+                      { mode: 'se'      as ChannelMode, label: 'Lo-Z',    title: 'Single-ended lo-Z' },
+                      { mode: 'btl-sub' as ChannelMode, label: '⊃ BTL',   title: 'Bridge-tied load — subwoofer' },
+                      ...(ch.hiZWatts
+                        ? [{ mode: 'hi-z' as ChannelMode, label: '70V', title: 'BTL hi-Z — 70V constant voltage' }]
+                        : []),
+                    ] as { mode: ChannelMode; label: string; title: string }[]).map(opt => {
+                      const active = currentMode === opt.mode
+                      return (
+                        <button
+                          key={opt.mode}
+                          className="nodrag"
+                          onClick={() => {
+                            if (opt.mode === 'se') {
+                              setChannelBtl(id, ch.id, false)
+                            } else if (opt.mode === 'btl-sub') {
+                              setChannelBtl(id, ch.id, true)
+                              setChannelHiZ(id, ch.id, false)
+                            } else {
+                              setChannelBtl(id, ch.id, true)
+                              setChannelHiZ(id, ch.id, true)
+                            }
+                          }}
+                          style={{
+                            padding: '1px 6px',
+                            fontSize: 9,
+                            borderRadius: 2,
+                            border: `1px solid ${active ? 'var(--amber)' : 'var(--border)'}`,
+                            background: active ? 'rgba(255,160,50,0.15)' : 'var(--surface-2)',
+                            color: active ? 'var(--amber)' : 'var(--text-dim)',
+                            cursor: 'pointer',
+                            fontWeight: active ? 600 : 400,
+                          }}
+                          title={opt.title}
+                        >
+                          {opt.label}
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
 
