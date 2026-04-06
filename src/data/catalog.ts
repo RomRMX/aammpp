@@ -40,6 +40,8 @@ export interface SpeakerModel {
   sensitivity?: number      // dB SPL @ 1W/1m (for SPL estimation)
   maxWatts?: number         // Continuous power handling (W)
   coverageAngle?: number    // Nominal dispersion angle (degrees, for future coverage calc)
+  dealer?: number           // US dealer cost ($)
+  msrp?: number             // MSRP ($)
 }
 
 export interface SourceModel {
@@ -877,7 +879,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 113,
+    "msrp": 328
   },
   {
     "modelId": "C65",
@@ -885,7 +889,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 146,
+    "msrp": 420
   },
   {
     "modelId": "C65EX",
@@ -893,7 +899,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 178,
+    "msrp": 511
   },
   {
     "modelId": "C67",
@@ -901,7 +909,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 178,
+    "msrp": 511
   },
   {
     "modelId": "C69",
@@ -909,7 +919,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 301,
+    "msrp": 855
   },
   {
     "modelId": "CIW61",
@@ -917,7 +929,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 183,
+    "msrp": 527
   },
   {
     "modelId": "CIW63",
@@ -925,7 +939,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 232,
+    "msrp": 667
   },
   {
     "modelId": "CIW65",
@@ -941,7 +957,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 307,
+    "msrp": 882
   },
   {
     "modelId": "D103DT",
@@ -949,7 +967,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 420,
+    "msrp": 1204
   },
   {
     "modelId": "D105",
@@ -957,7 +977,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 490,
+    "msrp": 1414
   },
   {
     "modelId": "D105EX",
@@ -965,7 +987,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 559,
+    "msrp": 1602
   },
   {
     "modelId": "D107",
@@ -973,7 +997,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 629,
+    "msrp": 1828
   },
   {
     "modelId": "D109",
@@ -981,7 +1007,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 748,
+    "msrp": 2150
   },
   {
     "modelId": "D39",
@@ -989,7 +1017,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 10
+    "impedance": 10,
+    "dealer": 178,
+    "msrp": 511
   },
   {
     "modelId": "D51DT",
@@ -997,7 +1027,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 146,
+    "msrp": 420
   },
   {
     "modelId": "D53",
@@ -1005,7 +1037,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 113,
+    "msrp": 328
   },
   {
     "modelId": "D53DT",
@@ -1021,7 +1055,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 146,
+    "msrp": 420
   },
   {
     "modelId": "D55EX",
@@ -1029,7 +1065,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 178,
+    "msrp": 511
   },
   {
     "modelId": "D57",
@@ -1037,7 +1075,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 178,
+    "msrp": 511
   },
   {
     "modelId": "D57DT/SUR",
@@ -1045,7 +1085,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 215,
+    "msrp": 619
   },
   {
     "modelId": "D59",
@@ -1053,7 +1095,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 237,
+    "msrp": 683
   },
   {
     "modelId": "D61DT",
@@ -1061,7 +1105,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 146,
+    "msrp": 420
   },
   {
     "modelId": "D63",
@@ -1069,7 +1115,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 113,
+    "msrp": 328
   },
   {
     "modelId": "D63DT/SUR",
@@ -1077,7 +1125,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 178,
+    "msrp": 511
   },
   {
     "modelId": "D65",
@@ -1085,7 +1135,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 146,
+    "msrp": 420
   },
   {
     "modelId": "D65EX",
@@ -1093,7 +1145,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 178,
+    "msrp": 511
   },
   {
     "modelId": "D67",
@@ -1101,7 +1155,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 178,
+    "msrp": 511
   },
   {
     "modelId": "D69",
@@ -1109,7 +1165,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 301,
+    "msrp": 855
   },
   {
     "modelId": "D80DT",
@@ -1117,7 +1175,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 167,
+    "msrp": 479
   },
   {
     "modelId": "D83",
@@ -1125,7 +1185,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 167,
+    "msrp": 484
   },
   {
     "modelId": "D83A",
@@ -1133,7 +1195,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 183,
+    "msrp": 533
   },
   {
     "modelId": "D83AEX",
@@ -1141,7 +1205,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 221,
+    "msrp": 635
   },
   {
     "modelId": "D83DT/SUR",
@@ -1149,7 +1215,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 264,
+    "msrp": 753
   },
   {
     "modelId": "D83DT/SUR EX",
@@ -1157,7 +1225,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 328,
+    "msrp": 941
   },
   {
     "modelId": "D83EX",
@@ -1165,7 +1235,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 210,
+    "msrp": 602
   },
   {
     "modelId": "D85",
@@ -1173,7 +1245,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 237,
+    "msrp": 683
   },
   {
     "modelId": "D85EX",
@@ -1181,7 +1255,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 285,
+    "msrp": 817
   },
   {
     "modelId": "D87",
@@ -1189,7 +1265,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 339,
+    "msrp": 973
   },
   {
     "modelId": "D89",
@@ -1197,7 +1275,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 576,
+    "msrp": 1694
   },
   {
     "modelId": "LCR37",
@@ -1205,7 +1285,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 129,
+    "msrp": 377
   },
   {
     "modelId": "LCR39",
@@ -1213,7 +1295,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 194,
+    "msrp": 565
   },
   {
     "modelId": "LCR65",
@@ -1221,7 +1305,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 194,
+    "msrp": 565
   },
   {
     "modelId": "LCR67",
@@ -1229,7 +1315,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 269,
+    "msrp": 774
   },
   {
     "modelId": "LCR69",
@@ -1237,7 +1325,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 377,
+    "msrp": 1086
   },
   {
     "modelId": "M2500",
@@ -1285,7 +1375,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Seasons",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 242,
+    "msrp": 538
   },
   {
     "modelId": "OS60B",
@@ -1293,7 +1385,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Seasons",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 301,
+    "msrp": 667
   },
   {
     "modelId": "OS60DTB",
@@ -1301,7 +1395,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Seasons",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 205,
+    "msrp": 457
   },
   {
     "modelId": "OS80B",
@@ -1309,7 +1405,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Seasons",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 457,
+    "msrp": 1011
   },
   {
     "modelId": "TF37DTEX",
@@ -1317,7 +1415,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "ThinFit",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 199,
+    "msrp": 570
   },
   {
     "modelId": "TF37EX",
@@ -1325,7 +1425,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "ThinFit",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 172,
+    "msrp": 495
   },
   {
     "modelId": "TFIW37EX",
@@ -1333,7 +1435,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "ThinFit",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 199,
+    "msrp": 570
   },
   {
     "modelId": "THTR67",
@@ -1349,7 +1453,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Theater",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 6
+    "impedance": 6,
+    "dealer": 807,
+    "msrp": 2322
   },
   {
     "modelId": "Blends602",
@@ -1359,7 +1465,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 83,
-    "maxWatts": 50
+    "maxWatts": 50,
+    "dealer": 650,
+    "msrp": 1625
   },
   {
     "modelId": "Blends802",
@@ -1369,7 +1477,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 83,
-    "maxWatts": 60
+    "maxWatts": 60,
+    "dealer": 860,
+    "msrp": 2150
   },
   {
     "modelId": "Blends803",
@@ -1379,7 +1489,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 83,
-    "maxWatts": 80
+    "maxWatts": 80,
+    "dealer": 1075,
+    "msrp": 2625
   },
   {
     "modelId": "P80DT",
@@ -1404,7 +1516,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 89,
     "maxWatts": 30,
-    "coverageAngle": 120
+    "coverageAngle": 120,
+    "dealer": 242,
+    "msrp": 484
   },
   {
     "modelId": "PC60",
@@ -1421,7 +1535,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 91,
     "maxWatts": 40,
-    "coverageAngle": 115
+    "coverageAngle": 115,
+    "dealer": 301,
+    "msrp": 602
   },
   {
     "modelId": "PC60S",
@@ -1438,7 +1554,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 87,
     "maxWatts": 40,
-    "coverageAngle": 90
+    "coverageAngle": 90,
+    "dealer": 301,
+    "msrp": 602
   },
   {
     "modelId": "PC80",
@@ -1455,7 +1573,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 92,
     "maxWatts": 60,
-    "coverageAngle": 100
+    "coverageAngle": 100,
+    "dealer": 447,
+    "msrp": 893
   },
   {
     "modelId": "PP50",
@@ -1467,7 +1587,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "tapOptions": [30, 15, 7.5, 3.75],
     "sensitivity": 87,
     "maxWatts": 50,
-    "coverageAngle": 120
+    "coverageAngle": 120,
+    "dealer": 301,
+    "msrp": 602
   },
   {
     "modelId": "PP60",
@@ -1479,7 +1601,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "tapOptions": [60, 30, 15, 7.5],
     "sensitivity": 88,
     "maxWatts": 65,
-    "coverageAngle": 120
+    "coverageAngle": 120,
+    "dealer": 366,
+    "msrp": 731
   },
   {
     "modelId": "PP80",
@@ -1491,7 +1615,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "tapOptions": [60, 30, 15, 7.5],
     "sensitivity": 90,
     "maxWatts": 100,
-    "coverageAngle": 110
+    "coverageAngle": 110,
+    "dealer": 538,
+    "msrp": 1075
   },
   {
     "modelId": "PS50",
@@ -1508,7 +1634,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 89,
     "maxWatts": 30,
-    "coverageAngle": 100
+    "coverageAngle": 100,
+    "dealer": 291,
+    "msrp": 581
   },
   {
     "modelId": "PS60",
@@ -1525,7 +1653,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 92,
     "maxWatts": 40,
-    "coverageAngle": 100
+    "coverageAngle": 100,
+    "dealer": 355,
+    "msrp": 710
   },
   {
     "modelId": "PS80",
@@ -1542,7 +1672,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 92,
     "maxWatts": 60,
-    "coverageAngle": 70
+    "coverageAngle": 70,
+    "dealer": 527,
+    "msrp": 1054
   },
   {
     "modelId": "6.5HD2-4ohm",
@@ -1553,7 +1685,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "impedance": 4,
     "sensitivity": 95,
     "maxWatts": 200,
-    "coverageAngle": 110
+    "coverageAngle": 110,
+    "dealer": 1935,
+    "msrp": 3870
   },
   {
     "modelId": "6.5HD2-70V",
@@ -1576,7 +1710,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "tapOptions": [70, 100],
     "sensitivity": 89,
     "maxWatts": 100,
-    "coverageAngle": 110
+    "coverageAngle": 110,
+    "dealer": 1075,
+    "msrp": 2150
   },
   {
     "modelId": "6.5HD-8ohm",
@@ -1587,7 +1723,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "impedance": 8,
     "sensitivity": 89,
     "maxWatts": 100,
-    "coverageAngle": 110
+    "coverageAngle": 110,
+    "dealer": 968,
+    "msrp": 1935
   },
   {
     "modelId": "ALSB106",
@@ -1596,7 +1734,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [200, 100, 70]
+    "tapOptions": [200, 100, 70],
+    "dealer": 1613,
+    "msrp": 3360
   },
   {
     "modelId": "ALSB64",
@@ -1605,7 +1745,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [100, 70, 50]
+    "tapOptions": [100, 70, 50],
+    "dealer": 807,
+    "msrp": 1882
   },
   {
     "modelId": "ALSB85",
@@ -1614,7 +1756,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
-    "tapOptions": [100, 70, 50]
+    "tapOptions": [100, 70, 50],
+    "dealer": 1210,
+    "msrp": 2634
   },
   {
     "modelId": "LSR40",
@@ -1628,7 +1772,9 @@ export const SPEAKERS: SpeakerModel[] = [
       50
     ],
     "sensitivity": 85,
-    "maxWatts": 50
+    "maxWatts": 50,
+    "dealer": 323,
+    "msrp": 645
   },
   {
     "modelId": "LSR60",
@@ -1642,7 +1788,9 @@ export const SPEAKERS: SpeakerModel[] = [
       75
     ],
     "sensitivity": 88,
-    "maxWatts": 75
+    "maxWatts": 75,
+    "dealer": 484,
+    "msrp": 968
   },
   {
     "modelId": "LSR80",
@@ -1656,7 +1804,9 @@ export const SPEAKERS: SpeakerModel[] = [
       100
     ],
     "sensitivity": 89,
-    "maxWatts": 100
+    "maxWatts": 100,
+    "dealer": 592,
+    "msrp": 1183
   },
   {
     "modelId": "AM5600",
@@ -1664,7 +1814,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Marquee",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
-    "impedance": 4
+    "impedance": 4,
+    "dealer": 2903,
+    "msrp": 7875
   },
   {
     "modelId": "AM3600",
@@ -1672,7 +1824,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Marquee",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
-    "impedance": 4
+    "impedance": 4,
+    "dealer": 1935,
+    "msrp": 5250
   },
   {
     "modelId": "AM6500A",
@@ -1680,7 +1834,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Marquee",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
-    "impedance": 4
+    "impedance": 4,
+    "dealer": 914,
+    "msrp": 2465
   },
   {
     "modelId": "ASM63",
@@ -1688,7 +1844,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "collection": "Seasons",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 1000,
+    "msrp": 2000
   },
   {
     "modelId": "ASM63SUB",
@@ -1698,7 +1856,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 89,
-    "maxWatts": 150
+    "maxWatts": 150,
+    "dealer": 650,
+    "msrp": 1290
   },
   {
     "modelId": "MOS36K",
@@ -1708,7 +1868,9 @@ export const SPEAKERS: SpeakerModel[] = [
     "speakerType": "lo-z",
     "impedance": 4,
     "sensitivity": 84,
-    "maxWatts": 75
+    "maxWatts": 75,
+    "dealer": 592,
+    "msrp": 1495
   },
   {
     "modelId": "LSH80",
@@ -1723,7 +1885,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 89,
     "maxWatts": 100,
-    "coverageAngle": 100
+    "coverageAngle": 100,
+    "dealer": 550,
+    "msrp": 1100
   },
   {
     "modelId": "LSH60",
@@ -1738,7 +1902,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 88,
     "maxWatts": 75,
-    "coverageAngle": 110
+    "coverageAngle": 110,
+    "dealer": 450,
+    "msrp": 900
   },
   {
     "modelId": "LSH40",
@@ -1753,7 +1919,9 @@ export const SPEAKERS: SpeakerModel[] = [
     ],
     "sensitivity": 85,
     "maxWatts": 50,
-    "coverageAngle": 120
+    "coverageAngle": 120,
+    "dealer": 300,
+    "msrp": 600
   }
 ];
 
@@ -1776,7 +1944,9 @@ export const SUBS: SpeakerModel[] = [
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 91,
-    "maxWatts": 300
+    "maxWatts": 300,
+    "dealer": 1828,
+    "msrp": 3655
   },
   {
     "modelId": "10HDR-AW-70V",
@@ -1796,7 +1966,9 @@ export const SUBS: SpeakerModel[] = [
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 97,
-    "maxWatts": 300
+    "maxWatts": 300,
+    "dealer": 1237,
+    "msrp": 2473
   },
   {
     "modelId": "12BP-IG-70v KIT",
@@ -1812,7 +1984,9 @@ export const SUBS: SpeakerModel[] = [
     "collection": "Seasons",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 2258,
+    "msrp": 4515
   },
   {
     "modelId": "12HDR-AW-70V",
@@ -1832,7 +2006,9 @@ export const SUBS: SpeakerModel[] = [
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 91,
-    "maxWatts": 1200
+    "maxWatts": 1200,
+    "dealer": 2150,
+    "msrp": 4300
   },
   {
     "modelId": "AMD10IWSUB",
@@ -1840,7 +2016,9 @@ export const SUBS: SpeakerModel[] = [
     "collection": "Marquee",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
-    "impedance": 4
+    "impedance": 4,
+    "dealer": 1344,
+    "msrp": 3875
   },
   {
     "modelId": "Blends800Sub",
@@ -1864,7 +2042,9 @@ export const SUBS: SpeakerModel[] = [
     "collection": "Composer",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 8
+    "impedance": 8,
+    "dealer": 968,
+    "msrp": 1935
   },
   {
     "modelId": "DBA10EX",
@@ -1872,7 +2052,9 @@ export const SUBS: SpeakerModel[] = [
     "collection": "Director",
     "brand": "Origin Acoustics",
     "speakerType": "lo-z",
-    "impedance": 4
+    "impedance": 4,
+    "dealer": 285,
+    "msrp": 656
   },
   {
     "modelId": "DSUB6X2",
@@ -1892,7 +2074,9 @@ export const SUBS: SpeakerModel[] = [
     "speakerType": "hi-z",
     "tapOptions": [
       300
-    ]
+    ],
+    "dealer": 1011,
+    "msrp": 2021
   },
   {
     "modelId": "OSUB12",
@@ -1902,7 +2086,9 @@ export const SUBS: SpeakerModel[] = [
     "speakerType": "hi-z",
     "tapOptions": [
       300
-    ]
+    ],
+    "dealer": 1376,
+    "msrp": 2747
   },
   {
     "modelId": "PCSUB8",
@@ -1913,7 +2099,9 @@ export const SUBS: SpeakerModel[] = [
     "impedance": 8,
     "tapOptions": [120, 60, 30, 15],
     "sensitivity": 90,
-    "maxWatts": 125
+    "maxWatts": 125,
+    "dealer": 307,
+    "msrp": 613
   },
   {
     "modelId": "PPSUB8",
@@ -1924,7 +2112,9 @@ export const SUBS: SpeakerModel[] = [
     "impedance": 8,
     "tapOptions": [120, 60, 30, 15],
     "sensitivity": 90,
-    "maxWatts": 125
+    "maxWatts": 125,
+    "dealer": 323,
+    "msrp": 570
   },
   {
     "modelId": "PSUB10X2",
@@ -1936,7 +2126,9 @@ export const SUBS: SpeakerModel[] = [
     "tapOptions": [300, 150, 75],
     "sensitivity": 94,
     "maxWatts": 600,
-    "coverageAngle": 360
+    "coverageAngle": 360,
+    "dealer": 780,
+    "msrp": 1290
   },
   {
     "modelId": "SUBD10",
@@ -1967,7 +2159,9 @@ export const SUBS: SpeakerModel[] = [
       75
     ],
     "sensitivity": 94,
-    "maxWatts": 300
+    "maxWatts": 300,
+    "dealer": 807,
+    "msrp": 1774
   }
 ];
 
