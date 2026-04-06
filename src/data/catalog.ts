@@ -1679,7 +1679,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD2-4ohm",
     "name": "6.5HD2-4ohm",
-    "collection": "HD",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4,
@@ -1703,7 +1703,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD-70V",
     "name": "6.5HD-70V",
-    "collection": "HD",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 8,
@@ -1717,7 +1717,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "6.5HD-8ohm",
     "name": "6.5HD-8ohm",
-    "collection": "HD",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
@@ -1730,7 +1730,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ALSB106",
     "name": "ALSB106",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
@@ -1741,7 +1741,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ALSB64",
     "name": "ALSB64",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
@@ -1752,7 +1752,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ALSB85",
     "name": "ALSB85",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "tappable",
     "impedance": 6,
@@ -1811,7 +1811,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "AM5600",
     "name": "AM5600",
-    "collection": "Marquee",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4,
@@ -1821,7 +1821,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "AM3600",
     "name": "AM3600",
-    "collection": "Marquee",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4,
@@ -1831,7 +1831,7 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "AM6500A",
     "name": "AM6500A",
-    "collection": "Marquee",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4,
@@ -1841,24 +1841,12 @@ export const SPEAKERS: SpeakerModel[] = [
   {
     "modelId": "ASM63",
     "name": "ASM63",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
     "dealer": 1000,
     "msrp": 2000
-  },
-  {
-    "modelId": "ASM63SUB",
-    "name": "ASM63SUB",
-    "collection": "Seasons",
-    "brand": "Ambisonic",
-    "speakerType": "lo-z",
-    "impedance": 8,
-    "sensitivity": 89,
-    "maxWatts": 150,
-    "dealer": 650,
-    "msrp": 1290
   },
   {
     "modelId": "MOS36K",
@@ -1926,6 +1914,18 @@ export const SPEAKERS: SpeakerModel[] = [
 ];
 
 export const SUBS: SpeakerModel[] = [
+  {
+    "modelId": "ASM63SUB",
+    "name": "ASM63SUB",
+    "collection": "Origin Acoustics",
+    "brand": "Origin Acoustics",
+    "speakerType": "lo-z",
+    "impedance": 8,
+    "sensitivity": 89,
+    "maxWatts": 150,
+    "dealer": 650,
+    "msrp": 1290
+  },
   {
     "modelId": "10BP-IG-70V",
     "name": "10BP-IG-70V",
