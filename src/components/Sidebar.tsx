@@ -7,382 +7,350 @@ interface SidebarProps {
   onDragStart: (e: React.DragEvent, modelId: string, kind: 'amp' | 'speaker' | 'sub' | 'source') => void
 }
 
-// Amp brand lookup by series
-const AMP_SERIES_TO_BRAND: Record<string, string> = {
-  Pro: 'Origin Pro',
-  Foundation: 'Origin Acoustics',
+type Tab = 'speakers' | 'subs' | 'amps'
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+// Maps sub collection → brand for two-level grouping in Subs tab
+const SUB_COLLECTION_BRAND: Record<string, string> = {
+  AMBI: 'AMBI',
+  MOS:  'AMBI',
+  Pro:  'Origin Pro',
+}
+function getSubBrand(collection: string): string {
+  return SUB_COLLECTION_BRAND[collection] ?? 'Origin Acoustics'
 }
 
-function getAmpBrand(amp: AmpModel): string {
-  return AMP_SERIES_TO_BRAND[amp.series] ?? 'Origin Acoustics'
-}
+// Brand display order for Subs tab
+const SUB_BRAND_ORDER = ['AMBI', 'Origin Acoustics', 'Origin Pro']
 
-function getSpeakerBrand(item: SpeakerModel): string {
-  return item.brand ?? 'Origin Acoustics'
-}
-
-function TypeBadge({ model }: { model: SpeakerModel }) {
-  if (model.speakerType === 'tappable') {
-    return <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>Lo-Z / Hi-Z</span>
-  }
-  if (model.speakerType === 'hi-z') {
-    return <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>Hi-Z</span>
-  }
-  return <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 4 }}>Lo-Z</span>
-}
-
-function CollectionGroup({
-  title,
-  items,
-  kind,
-  onDragStart,
-}: {
-  title: string
-  items: SpeakerModel[]
-  kind: 'speaker' | 'sub'
-  onDragStart: SidebarProps['onDragStart']
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div style={{ borderBottom: '1px solid var(--border)' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '4px 8px 4px 16px',
-          background: 'var(--surface-2)',
-          border: 'none',
-          color: 'var(--text-secondary)',
-          cursor: 'pointer',
-          fontSize: 10,
-          fontWeight: 600,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}
-      >
-        <span>{title}</span>
-        <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
-      </button>
-
-      {open && (
-        <div>
-          {items.map(item => (
-            <div
-              key={item.modelId}
-              draggable
-              onDragStart={e => onDragStart(e, item.modelId, kind)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '5px 8px 5px 24px',
-                cursor: 'grab',
-                borderTop: '1px solid var(--border)',
-                background: 'var(--surface)',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
-            >
-              <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600, flex: 1 }}>
-                {cleanSpeakerName(item.name, item.collection)}
-              </span>
-              <TypeBadge model={item} />
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function BrandGroup({
-  brand,
-  collections,
-  kind,
-  onDragStart,
-}: {
-  brand: string
-  collections: Record<string, SpeakerModel[]>
-  kind: 'speaker' | 'sub'
-  onDragStart: SidebarProps['onDragStart']
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div style={{ borderBottom: '1px solid var(--border)' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '5px 8px',
-          background: 'var(--surface-2)',
-          border: 'none',
-          color: 'var(--blue)',
-          cursor: 'pointer',
-          fontSize: 11,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}
-      >
-        <span>{brand}</span>
-        <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
-      </button>
-
-      {open && (
-        <div>
-          {Object.keys(collections).sort().map(col => (
-            <CollectionGroup
-              key={col}
-              title={col}
-              items={collections[col]}
-              kind={kind}
-              onDragStart={onDragStart}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function AmpBrandGroup({
-  brand,
-  collections,
-  onDragStart,
-}: {
-  brand: string
-  collections: Record<string, AmpModel[]>
-  onDragStart: SidebarProps['onDragStart']
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div style={{ borderBottom: '1px solid var(--border)' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '5px 8px',
-          background: 'var(--surface-2)',
-          border: 'none',
-          color: 'var(--blue)',
-          cursor: 'pointer',
-          fontSize: 11,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}
-      >
-        <span>{brand}</span>
-        <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
-      </button>
-
-      {open && (
-        <div>
-          {Object.keys(collections).sort().map(col => (
-            <AmpCollectionGroup
-              key={col}
-              title={col}
-              items={collections[col]}
-              onDragStart={onDragStart}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function AmpCollectionGroup({
-  title,
-  items,
-  onDragStart,
-}: {
-  title: string
-  items: AmpModel[]
-  onDragStart: SidebarProps['onDragStart']
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div style={{ borderBottom: '1px solid var(--border)' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '4px 8px 4px 16px',
-          background: 'var(--surface-2)',
-          border: 'none',
-          color: 'var(--text-secondary)',
-          cursor: 'pointer',
-          fontSize: 10,
-          fontWeight: 600,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}
-      >
-        <span>{title}</span>
-        <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
-      </button>
-
-      {open && (
-        <div>
-          {items.map(amp => (
-            <div
-              key={amp.modelId}
-              draggable
-              onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '5px 8px 5px 24px',
-                cursor: 'grab',
-                borderTop: '1px solid var(--border)',
-                background: 'var(--surface)',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
-            >
-              <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{amp.name}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function SectionToggle({
-  label,
-  open,
-  onToggle,
-  sticky,
-}: {
-  label: string
-  open: boolean
-  onToggle: () => void
-  sticky?: boolean
-}) {
-  return (
-    <button
-      onClick={onToggle}
-      style={{
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '6px 8px',
-        background: 'var(--bg)',
-        border: 'none',
-        borderBottom: '1px solid var(--border)',
-        cursor: 'pointer',
-        fontSize: 10,
-        fontWeight: 700,
-        color: 'var(--blue)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        ...(sticky ? { position: 'sticky', top: 0, zIndex: 2 } : {}),
-      }}
-    >
-      <span>{label}</span>
-      <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{open ? '▼' : '▶'}</span>
-    </button>
-  )
-}
-
-/** Group speakers/subs by brand → collection, filtering out specsUnavailable */
-function groupByBrandAndCollection(
-  items: SpeakerModel[],
-  query: string,
-): Record<string, Record<string, SpeakerModel[]>> {
+function groupByCollection(items: SpeakerModel[], query: string): Record<string, SpeakerModel[]> {
   const q = query.toLowerCase()
-  const result: Record<string, Record<string, SpeakerModel[]>> = {}
+  const result: Record<string, SpeakerModel[]> = {}
   items
     .filter(item => !item.specsUnavailable)
     .filter(item => !q || item.modelId.toLowerCase().includes(q) || item.name.toLowerCase().includes(q))
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(item => {
-      const brand = getSpeakerBrand(item)
       const col = item.collection || 'Other'
-      if (!result[brand]) result[brand] = {}
-      if (!result[brand][col]) result[brand][col] = []
-      result[brand][col].push(item)
+      if (!result[col]) result[col] = []
+      result[col].push(item)
     })
   return result
 }
 
-/** Group amps by brand → collection (series) */
-function groupAmpsByBrandAndCollection(
-  items: AmpModel[],
-  query: string,
-): Record<string, Record<string, AmpModel[]>> {
+// Groups subs as brand → collection → items
+function groupSubsByBrand(items: SpeakerModel[], query: string): Record<string, Record<string, SpeakerModel[]>> {
+  const byCollection = groupByCollection(items, query)
+  const result: Record<string, Record<string, SpeakerModel[]>> = {}
+  for (const [col, colItems] of Object.entries(byCollection)) {
+    const brand = getSubBrand(col)
+    if (!result[brand]) result[brand] = {}
+    result[brand][col] = colItems
+  }
+  return result
+}
+
+function ampOutputLabel(amp: AmpModel): string {
+  const modes = new Set(amp.channels.map(c => c.outputMode))
+  if (modes.has('lo-z') && modes.has('hi-z')) return 'Lo-Z · Hi-Z'
+  if (modes.has('hi-z')) return 'Hi-Z'
+  return 'Lo-Z'
+}
+
+function groupBySeriesAmps(items: AmpModel[], query: string): Record<string, AmpModel[]> {
   const q = query.toLowerCase()
-  const result: Record<string, Record<string, AmpModel[]>> = {}
+  const result: Record<string, AmpModel[]> = {}
   items
-    .filter(amp => !q || amp.name.toLowerCase().includes(q) || amp.modelId.toLowerCase().includes(q))
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach(amp => {
-      const brand = getAmpBrand(amp)
-      const col = amp.series || 'Other'
-      if (!result[brand]) result[brand] = {}
-      if (!result[brand][col]) result[brand][col] = []
-      result[brand][col].push(amp)
+    .filter(item => !q || item.name.toLowerCase().includes(q) || item.modelId.toLowerCase().includes(q))
+    .forEach(item => {
+      const s = item.series || 'Other'
+      if (!result[s]) result[s] = []
+      result[s].push(item)
     })
   return result
 }
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function GroupDivider({ label }: { label: string }) {
+  return (
+    <div style={{
+      padding: '6px 10px 3px',
+      fontSize: 9,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.1em',
+      color: 'var(--text-dim)',
+      background: 'var(--bg)',
+      borderBottom: '1px solid var(--border)',
+      userSelect: 'none',
+    }}>
+      {label}
+    </div>
+  )
+}
+
+function TypeBadge({ model }: { model: SpeakerModel }) {
+  const style: React.CSSProperties = { fontSize: 9, marginLeft: 4, flexShrink: 0, color: 'var(--text-secondary)' }
+  if (model.speakerType === 'tappable') return <span style={style}>Lo-Z · Hi-Z</span>
+  if (model.speakerType === 'hi-z')    return <span style={style}>Hi-Z</span>
+  return <span style={{ ...style, color: 'var(--text-dim)' }}>Lo-Z</span>
+}
+
+function BrandDivider({ label }: { label: string }) {
+  return (
+    <div style={{
+      padding: '6px 10px 3px',
+      fontSize: 9,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.1em',
+      color: 'var(--text-dim)',
+      background: 'var(--bg)',
+      borderBottom: '1px solid var(--border)',
+      userSelect: 'none',
+    }}>
+      {label}
+    </div>
+  )
+}
+
+function CatBadge({ label }: { label: string }) {
+  return (
+    <span style={{
+      fontSize: 9,
+      color: 'var(--text-dim)',
+      border: '1px solid var(--border)',
+      borderRadius: 3,
+      padding: '0 4px',
+      marginLeft: 6,
+      flexShrink: 0,
+    }}>
+      {label}
+    </span>
+  )
+}
+
+const GRIP = '⠿'
+
+function DraggableRow({
+  label,
+  onDragStart,
+  right,
+  accent,
+  bgOverride,
+}: {
+  label: string
+  onDragStart: (e: React.DragEvent) => void
+  right?: React.ReactNode
+  accent?: string
+  bgOverride?: string
+}) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div
+      draggable
+      onDragStart={onDragStart}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '5px 8px 5px 0',
+        cursor: 'grab',
+        background: hovered
+          ? (bgOverride ? 'rgba(74,143,212,0.18)' : 'var(--surface-2)')
+          : (bgOverride ?? 'var(--surface)'),
+        borderBottom: '1px solid var(--border)',
+        borderLeft: `3px solid ${accent ?? 'transparent'}`,
+        gap: 6,
+      }}
+    >
+      <span style={{ color: 'var(--text-dim)', fontSize: 11, paddingLeft: 6, flexShrink: 0 }}>{GRIP}</span>
+      <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {label}
+      </span>
+      {right}
+    </div>
+  )
+}
+
+// ── Tab content ───────────────────────────────────────────────────────────────
+
+function SpeakersTab({ query, onDragStart }: { query: string; onDragStart: SidebarProps['onDragStart'] }) {
+  const grouped = useMemo(() => groupByCollection(CATALOG_SPEAKERS, query), [query])
+  const collections = Object.keys(grouped).sort()
+  if (collections.length === 0)
+    return <EmptyState />
+  return (
+    <>
+      {collections.map(col => (
+        <div key={col}>
+          <GroupDivider label={col} />
+          {grouped[col].map(item => (
+            <DraggableRow
+              key={item.modelId}
+              label={cleanSpeakerName(item.name, item.collection)}
+              onDragStart={e => onDragStart(e, item.modelId, 'speaker')}
+              right={<TypeBadge model={item} />}
+            />
+          ))}
+        </div>
+      ))}
+    </>
+  )
+}
+
+function SubsTab({ query, onDragStart }: { query: string; onDragStart: SidebarProps['onDragStart'] }) {
+  const byBrand = useMemo(() => groupSubsByBrand(CATALOG_SUBS, query), [query])
+  const filteredSubAmps = useMemo(() => {
+    const q = query.toLowerCase()
+    return q
+      ? CATALOG_SUB_AMPS.filter(a => a.name.toLowerCase().includes(q) || a.modelId.toLowerCase().includes(q))
+      : CATALOG_SUB_AMPS
+  }, [query])
+
+  const hasPassive = Object.keys(byBrand).length > 0
+  const hasSubs = filteredSubAmps.length > 0
+  if (!hasPassive && !hasSubs) return <EmptyState />
+
+  return (
+    <>
+      {SUB_BRAND_ORDER.filter(b => byBrand[b]).map(brand => {
+        const collections = Object.keys(byBrand[brand]).sort()
+        return (
+          <div key={brand}>
+            <BrandDivider label={brand} />
+            {collections.map(col =>
+              byBrand[brand][col].map(item => (
+                <DraggableRow
+                  key={item.modelId}
+                  label={cleanSpeakerName(item.name, item.collection)}
+                  onDragStart={e => onDragStart(e, item.modelId, 'sub')}
+                  right={<TypeBadge model={item} />}
+                />
+              ))
+            )}
+          </div>
+        )
+      })}
+      {hasSubs && (
+        <>
+          <GroupDivider label="Sub Amplifiers" />
+          {filteredSubAmps.map(amp => (
+            <DraggableRow
+              key={amp.modelId}
+              label={amp.name}
+              onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
+              right={<span style={{ fontSize: 9, color: 'var(--text-secondary)', marginLeft: 4, flexShrink: 0 }}>{ampOutputLabel(amp)}</span>}
+            />
+          ))}
+        </>
+      )}
+    </>
+  )
+}
+
+function AmpsTab({ query, onDragStart }: { query: string; onDragStart: SidebarProps['onDragStart'] }) {
+  const grouped = useMemo(() => groupBySeriesAmps(CATALOG_AMPS, query), [query])
+  const SERIES_ORDER = ['Pro', 'Foundation']
+  const series = SERIES_ORDER.filter(s => grouped[s]).concat(Object.keys(grouped).filter(s => !SERIES_ORDER.includes(s)).sort())
+  if (series.length === 0) return <EmptyState />
+  return (
+    <>
+      {series.map(s => (
+        <div key={s}>
+          <GroupDivider label={s} />
+          {grouped[s].map(amp => (
+            <DraggableRow
+              key={amp.modelId}
+              label={amp.name}
+              onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
+              accent="var(--blue)"
+            />
+          ))}
+        </div>
+      ))}
+    </>
+  )
+}
+
+function SearchResults({ query, onDragStart }: { query: string; onDragStart: SidebarProps['onDragStart'] }) {
+  const q = query.toLowerCase()
+  const speakers = CATALOG_SPEAKERS.filter(i => !i.specsUnavailable && (i.modelId.toLowerCase().includes(q) || i.name.toLowerCase().includes(q)))
+  const subs = CATALOG_SUBS.filter(i => !i.specsUnavailable && (i.modelId.toLowerCase().includes(q) || i.name.toLowerCase().includes(q)))
+  const amps = [...CATALOG_AMPS, ...CATALOG_SUB_AMPS].filter(a => a.name.toLowerCase().includes(q) || a.modelId.toLowerCase().includes(q))
+
+  if (speakers.length === 0 && subs.length === 0 && amps.length === 0)
+    return <EmptyState />
+
+  return (
+    <>
+      {speakers.map(item => (
+        <DraggableRow
+          key={item.modelId}
+          label={cleanSpeakerName(item.name, item.collection)}
+          onDragStart={e => onDragStart(e, item.modelId, 'speaker')}
+          right={<><TypeBadge model={item} /><CatBadge label="SPKR" /></>}
+        />
+      ))}
+      {subs.map(item => (
+        <DraggableRow
+          key={item.modelId}
+          label={cleanSpeakerName(item.name, item.collection)}
+          onDragStart={e => onDragStart(e, item.modelId, 'sub')}
+          right={<><TypeBadge model={item} /><CatBadge label="SUB" /></>}
+        />
+      ))}
+      {amps.map(amp => (
+        <DraggableRow
+          key={amp.modelId}
+          label={amp.name}
+          onDragStart={e => onDragStart(e, amp.modelId, 'amp')}
+          right={<CatBadge label="AMP" />}
+          accent="var(--blue)"
+        />
+      ))}
+    </>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div style={{ padding: '20px 12px', color: 'var(--text-dim)', fontSize: 12, textAlign: 'center' }}>
+      No results
+    </div>
+  )
+}
+
+// ── Main Sidebar ──────────────────────────────────────────────────────────────
 
 export function Sidebar({ onDragStart }: SidebarProps) {
   const [query, setQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<Tab>('speakers')
 
-  const speakerBrands = useMemo(
-    () => groupByBrandAndCollection(CATALOG_SPEAKERS, query),
-    [query],
-  )
-  const subBrands = useMemo(
-    () => groupByBrandAndCollection(CATALOG_SUBS, query),
-    [query],
-  )
-  const ampBrands = useMemo(
-    () => groupAmpsByBrandAndCollection(CATALOG_AMPS, query),
-    [query],
-  )
-  const subAmpBrands = useMemo(
-    () => groupAmpsByBrandAndCollection(CATALOG_SUB_AMPS, query),
-    [query],
-  )
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'speakers', label: 'Speakers' },
+    { id: 'subs',     label: 'Subs' },
+    { id: 'amps',     label: 'Amps' },
+  ]
 
-  const [speakersOpen, setSpeakersOpen] = useState(true)
-  const [subsOpen,     setSubsOpen]     = useState(true)
-  const [sourceOpen,   setSourceOpen]   = useState(true)
-  const [ampsOpen,     setAmpsOpen]     = useState(true)
+  const isSearching = query.trim().length > 0
 
   return (
-    <div
-      style={{
-        width: 220,
-        height: '100%',
-        background: 'var(--surface)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        flexShrink: 0,
-      }}
-    >
-      {/* Search bar */}
+    <div style={{
+      width: 240,
+      height: '100%',
+      background: 'var(--surface)',
+      borderRight: '1px solid var(--border)',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      flexShrink: 0,
+    }}>
+
+      {/* Search */}
       <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
         <input
           type="text"
@@ -403,81 +371,61 @@ export function Sidebar({ onDragStart }: SidebarProps) {
         />
       </div>
 
-      {/* Scrollable content */}
+      {/* Tab bar */}
+      {!isSearching && (
+        <div style={{
+          display: 'flex',
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--bg)',
+          flexShrink: 0,
+        }}>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                flex: 1,
+                padding: '6px 4px',
+                border: 'none',
+                borderBottom: activeTab === tab.id ? '2px solid var(--blue)' : '2px solid transparent',
+                background: 'transparent',
+                color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-dim)',
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                cursor: 'pointer',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Scrollable list */}
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-
-        {/* Amplifiers */}
-        <SectionToggle label="Amplifiers" open={ampsOpen} onToggle={() => setAmpsOpen(o => !o)} sticky />
-        {ampsOpen && Object.keys(ampBrands).sort().map(brand => (
-          <AmpBrandGroup
-            key={brand}
-            brand={brand}
-            collections={ampBrands[brand]}
-            onDragStart={onDragStart}
-          />
-        ))}
-
-        {/* Speakers */}
-        <SectionToggle label="Speakers" open={speakersOpen} onToggle={() => setSpeakersOpen(o => !o)} sticky />
-        {speakersOpen && Object.keys(speakerBrands).sort().map(brand => (
-          <BrandGroup
-            key={brand}
-            brand={brand}
-            collections={speakerBrands[brand]}
-            kind="speaker"
-            onDragStart={onDragStart}
-          />
-        ))}
-
-        {/* Subwoofers */}
-        <SectionToggle label="Subwoofers" open={subsOpen} onToggle={() => setSubsOpen(o => !o)} sticky />
-        {subsOpen && (
-          <>
-            {Object.keys(subBrands).sort().map(brand => (
-              <BrandGroup
-                key={brand}
-                brand={brand}
-                collections={subBrands[brand]}
-                kind="sub"
-                onDragStart={onDragStart}
-              />
-            ))}
-            {Object.keys(subAmpBrands).sort().map(brand => (
-              <AmpBrandGroup
-                key={`subamp-${brand}`}
-                brand={brand}
-                collections={subAmpBrands[brand]}
-                onDragStart={onDragStart}
-              />
-            ))}
-          </>
+        {isSearching ? (
+          <SearchResults query={query} onDragStart={onDragStart} />
+        ) : activeTab === 'speakers' ? (
+          <SpeakersTab query={query} onDragStart={onDragStart} />
+        ) : activeTab === 'subs' ? (
+          <SubsTab query={query} onDragStart={onDragStart} />
+        ) : (
+          <AmpsTab query={query} onDragStart={onDragStart} />
         )}
-
-        {/* Source */}
-        <SectionToggle label="Source" open={sourceOpen} onToggle={() => setSourceOpen(o => !o)} sticky />
-        {sourceOpen && (
-          <div
-            draggable
-            onDragStart={e => onDragStart(e, CATALOG_SOURCE.modelId, 'source')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '6px 8px',
-              cursor: 'grab',
-              borderBottom: '1px solid var(--border)',
-              borderLeft: '3px solid var(--blue)',
-              background: 'rgba(74,143,212,0.10)',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(74,143,212,0.18)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(74,143,212,0.10)' }}
-          >
-            <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>
-              {CATALOG_SOURCE.name}
-            </span>
-          </div>
-        )}
-
       </div>
+
+      {/* Pinned source footer */}
+      <div style={{ borderTop: '1px solid var(--border)', flexShrink: 0, background: 'rgba(74,143,212,0.10)' }}>
+        <DraggableRow
+          label={CATALOG_SOURCE.name}
+          onDragStart={e => onDragStart(e, CATALOG_SOURCE.modelId, 'source')}
+          accent="var(--blue)"
+          bgOverride="rgba(74,143,212,0.10)"
+        />
+      </div>
+
     </div>
   )
 }
