@@ -1917,8 +1917,8 @@ export const SUBS: SpeakerModel[] = [
   {
     "modelId": "ASM63SUB",
     "name": "ASM63SUB",
-    "collection": "Origin Acoustics",
-    "brand": "Origin Acoustics",
+    "collection": "AMBI",
+    "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
     "sensitivity": 89,
@@ -1939,7 +1939,7 @@ export const SUBS: SpeakerModel[] = [
   {
     "modelId": "10BP-IG-8ohm",
     "name": "10BP-IG-8ohm",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
@@ -1961,7 +1961,7 @@ export const SUBS: SpeakerModel[] = [
   {
     "modelId": "10HDR-AW-8ohm",
     "name": "10HDR-AW-8ohm",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
@@ -1981,7 +1981,7 @@ export const SUBS: SpeakerModel[] = [
   {
     "modelId": "12BP-IG-8ohm",
     "name": "12BP-IG-8ohm",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
@@ -2001,7 +2001,7 @@ export const SUBS: SpeakerModel[] = [
   {
     "modelId": "12HDR-AW-8ohm",
     "name": "12HDR-AW-8ohm",
-    "collection": "Seasons",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 8,
@@ -2011,9 +2011,9 @@ export const SUBS: SpeakerModel[] = [
     "msrp": 4300
   },
   {
-    "modelId": "AMD10IWSUB",
-    "name": "AMD10IWSUB",
-    "collection": "Marquee",
+    "modelId": "AMD10-SUB",
+    "name": "AMD10-SUB",
+    "collection": "AMBI",
     "brand": "Ambisonic",
     "speakerType": "lo-z",
     "impedance": 4,
