@@ -91,6 +91,45 @@ function GroupDivider({ label }: { label: string }) {
   )
 }
 
+function CollapsibleGroup({
+  label,
+  children,
+  defaultOpen = true,
+}: {
+  label: string
+  children: React.ReactNode
+  defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '6px 10px 4px',
+          fontSize: 9,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          color: 'var(--text-dim)',
+          background: 'var(--bg)',
+          border: 'none',
+          borderBottom: '1px solid var(--border)',
+          cursor: 'pointer',
+        }}
+      >
+        <span>{label}</span>
+        <span style={{ fontSize: 8 }}>{open ? '▼' : '▶'}</span>
+      </button>
+      {open && children}
+    </div>
+  )
+}
+
 function TypeBadge({ model }: { model: SpeakerModel }) {
   const style: React.CSSProperties = { fontSize: 9, marginLeft: 4, flexShrink: 0, color: 'var(--text-secondary)' }
   if (model.speakerType === 'tappable') return <span style={style}>Lo-Z · Hi-Z</span>
@@ -186,8 +225,7 @@ function SpeakersTab({ query, onDragStart }: { query: string; onDragStart: Sideb
   return (
     <>
       {collections.map(col => (
-        <div key={col}>
-          <GroupDivider label={col} />
+        <CollapsibleGroup key={col} label={col} defaultOpen={!query}>
           {grouped[col].map(item => (
             <DraggableRow
               key={item.modelId}
@@ -196,7 +234,7 @@ function SpeakersTab({ query, onDragStart }: { query: string; onDragStart: Sideb
               right={<TypeBadge model={item} />}
             />
           ))}
-        </div>
+        </CollapsibleGroup>
       ))}
     </>
   )
